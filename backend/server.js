@@ -2,6 +2,10 @@ const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const connectDB = require("./config/db");
+const helmet = require("helmet");
+const morgan = require("morgan");
+const rateLimit = require("express-rate-limit");
+
 
 dotenv.config();
 connectDB();
@@ -10,6 +14,14 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(helmet());
+app.use(morgan("dev"));
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100
+});
+app.use(limiter);
 
 const userRoutes = require("./routes/userRoutes");
 const productRoutes = require("./routes/productRoutes");
