@@ -13,11 +13,11 @@ app.use(express.json());
 
 const userRoutes = require("./routes/userRoutes");
 const productRoutes = require("./routes/productRoutes");
-
+const cartRoutes = require("./routes/cartRoutes");
 
 app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
-
+app.use("/api/cart", cartRoutes);
 
 app.get("/", (req, res) => {
   res.send("ShopSmart API Running...");
