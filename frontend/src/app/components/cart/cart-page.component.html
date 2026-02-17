@@ -1,0 +1,17 @@
+<div class="container mt-4">
+  <h3>My Cart</h3>
+
+  <div *ngIf="cart?.items?.length === 0">
+    Cart is empty
+  </div>
+
+  <div *ngFor="let item of cart?.items" class="card mb-2 p-3">
+    <h5>{{ item.product.title }}</h5>
+    <p>Price: ₹{{ item.product.price }}</p>
+    <p>Quantity: {{ item.quantity }}</p>
+    <button class="btn btn-danger"
+            (click)="removeItem(item.product._id)">
+      Remove
+    </button>
+  </div>
+</div>
