@@ -13,6 +13,17 @@ import { Product, ShopProduct } from '../../services/product';
   styleUrl: './shop-dashboard.css'
 })
 export class ShopDashboard {
+  readonly sidebarItems = [
+    { id: 'add-product', label: 'Add Product' },
+    { id: 'manage-products', label: 'Manage Products' },
+    { id: 'view-orders', label: 'View Orders' },
+    { id: 'update-order-status', label: 'Update Order Status' },
+    { id: 'sales-report', label: 'View Sales Report' }
+  ] as const;
+
+  activeSection: (typeof this.sidebarItems)[number]['id'] = 'add-product';
+  sidebarOpen = false;
+
   loading = true;
   error = '';
 
@@ -177,5 +188,27 @@ export class ShopDashboard {
           this.error = err.error?.message || 'Unable to update order status.';
         }
       });
+  }
+
+  selectSection(sectionId: (typeof this.sidebarItems)[number]['id']): void {
+    this.activeSection = sectionId;
+    this.sidebarOpen = false;
+  }
+
+  toggleSidebar(): void {
+    this.sidebarOpen = !this.sidebarOpen;
+  }
+
+  closeSidebar(): void {
+    this.sidebarOpen = false;
+  }
+
+  isSectionActive(sectionId: (typeof this.sidebarItems)[number]['id']): boolean {
+    return this.activeSection === sectionId;
+  }
+
+  get activeSectionLabel(): string {
+    const current = this.sidebarItems.find((item) => item.id === this.activeSection);
+    return current?.label || 'Shop Dashboard';
   }
 }
