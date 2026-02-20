@@ -17,6 +17,8 @@ export class ProductList {
   loading = true;
   error = '';
   search = '';
+  selectedCategory = '';
+  categories: string[] = [];
 
   constructor(
     private product: Product,
@@ -27,6 +29,7 @@ export class ProductList {
     this.product.getProducts().subscribe({
       next: (res) => {
         this.products = res;
+        this.categories = [...new Set(res.map((item) => item.category).filter(Boolean) as string[])].sort();
         this.filteredProducts = res;
         this.loading = false;
       },
@@ -39,15 +42,32 @@ export class ProductList {
 
   onSearch(term: string): void {
     this.search = term;
-    const query = term.trim().toLowerCase();
-    this.filteredProducts = this.products.filter((item) =>
-      item.title.toLowerCase().includes(query) ||
-      item.category?.toLowerCase().includes(query)
-    );
+    this.applyFilters();
+  }
+
+  onCategoryChange(category: string): void {
+    this.selectedCategory = category;
+    this.applyFilters();
   }
 
   addToCart(item: ShopProduct): void {
     this.cartService.addToCart(item);
+  }
+
+  private applyFilters(): void {
+    const query = this.search.trim().toLowerCase();
+
+    this.filteredProducts = this.products.filter((item) => {
+      const matchesSearch =
+        !query ||
+        item.title.toLowerCase().includes(query) ||
+        item.description.toLowerCase().includes(query) ||
+        item.category?.toLowerCase().includes(query);
+
+      const matchesCategory = !this.selectedCategory || item.category === this.selectedCategory;
+
+      return !!matchesSearch && matchesCategory;
+    });
   }
 }
 

@@ -11,6 +11,15 @@ export interface ShopProduct {
   image?: string;
   category?: string;
   stock?: number;
+  rating?: number;
+  numReviews?: number;
+  reviews?: Array<{
+    _id?: string;
+    name: string;
+    rating: number;
+    comment: string;
+    createdAt?: string;
+  }>;
 }
 
 @Injectable({
@@ -20,8 +29,23 @@ export class Product {
 
   constructor(private http: HttpClient) {}
 
-  getProducts(): Observable<ShopProduct[]> {
-    return this.http.get<ShopProduct[]>(environment.apiUrl + '/products');
+  getProducts(filters?: { search?: string; category?: string }): Observable<ShopProduct[]> {
+    const params = new URLSearchParams();
+
+    if (filters?.search?.trim()) {
+      params.set('search', filters.search.trim());
+    }
+
+    if (filters?.category?.trim()) {
+      params.set('category', filters.category.trim());
+    }
+
+    const query = params.toString();
+    const url = query
+      ? `${environment.apiUrl}/products?${query}`
+      : `${environment.apiUrl}/products`;
+
+    return this.http.get<ShopProduct[]>(url);
   }
 
   getProductById(id: string): Observable<ShopProduct> {

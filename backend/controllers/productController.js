@@ -12,7 +12,19 @@ exports.addProduct = async (req, res) => {
 
 // 📄 Get All Products
 exports.getProducts = async (req, res) => {
-  const products = await Product.find();
+  const { search = "", category = "" } = req.query;
+
+  const query = {};
+
+  if (search) {
+    query.title = { $regex: search, $options: "i" };
+  }
+
+  if (category) {
+    query.category = category;
+  }
+
+  const products = await Product.find(query).sort({ createdAt: -1 });
   res.json(products);
 };
 
@@ -50,4 +62,47 @@ exports.deleteProduct = async (req, res) => {
   } else {
     res.status(404).json({ message: "Product not found" });
   }
+};
+
+// ⭐ Add Product Review (Logged-in User)
+exports.addProductReview = async (req, res) => {
+  const { rating, comment } = req.body;
+
+  if (!rating || !comment) {
+    return res.status(400).json({ message: "Rating and comment are required" });
+  }
+
+  const parsedRating = Number(rating);
+  if (Number.isNaN(parsedRating) || parsedRating < 1 || parsedRating > 5) {
+    return res.status(400).json({ message: "Rating must be between 1 and 5" });
+  }
+
+  const product = await Product.findById(req.params.id);
+
+  if (!product) {
+    return res.status(404).json({ message: "Product not found" });
+  }
+
+  const alreadyReviewed = product.reviews.find(
+    (review) => review.user.toString() === req.user._id.toString()
+  );
+
+  if (alreadyReviewed) {
+    return res.status(400).json({ message: "You already reviewed this product" });
+  }
+
+  const review = {
+    user: req.user._id,
+    name: req.user.name,
+    rating: parsedRating,
+    comment,
+  };
+
+  product.reviews.push(review);
+  product.numReviews = product.reviews.length;
+  product.rating =
+    product.reviews.reduce((acc, item) => acc + item.rating, 0) / product.reviews.length;
+
+  await product.save();
+  res.status(201).json({ message: "Review added" });
 };

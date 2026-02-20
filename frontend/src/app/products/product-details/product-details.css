@@ -4,3 +4,42 @@
 	object-fit: cover;
 	border-radius: 8px;
 }
+
+.rating-summary {
+	font-size: 0.95rem;
+	font-weight: 600;
+	margin-bottom: 0.7rem;
+}
+
+.stock {
+	font-weight: 600;
+	color: #15803d;
+}
+
+.stock.out {
+	color: #b91c1c;
+}
+
+.reviews-section {
+	border-top: 1px solid #e5e7eb;
+	padding-top: 1rem;
+}
+
+.review-list {
+	display: grid;
+	gap: 0.7rem;
+}
+
+.review-card {
+	border: 1px solid #e5e7eb;
+	border-radius: 10px;
+	padding: 0.75rem;
+	background: #fff;
+}
+
+.review-head {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 0.35rem;
+}
