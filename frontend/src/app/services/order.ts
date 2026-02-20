@@ -94,6 +94,10 @@ export class OrderService {
     return this.http.put<OrderResponse>(`${environment.apiUrl}/orders/${orderId}`, payload);
   }
 
+  cancelOrder(orderId: string): Observable<OrderResponse> {
+    return this.http.patch<OrderResponse>(`${environment.apiUrl}/orders/${orderId}/cancel`, {});
+  }
+
   verifyPayment(payload: VerifyPaymentPayload): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(`${environment.apiUrl}/payment/verify`, payload);
   }

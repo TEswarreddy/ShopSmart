@@ -93,11 +93,21 @@
             } @else {
               <div>
                 <span class="meta-label">Order Status</span>
-                <strong>{{ order.orderStatus }}</strong>
+                <strong class="status-pill" [class.processing]="order.orderStatus === 'Processing'" [class.cancelled]="order.orderStatus === 'Cancelled'" [class.delivered]="order.orderStatus === 'Delivered'">
+                  {{ order.orderStatus }}
+                </strong>
               </div>
               <div>
                 <span class="meta-label">Payment Status</span>
                 <strong>{{ order.paymentStatus }}</strong>
+              </div>
+
+              <div>
+                @if (canCancel(order)) {
+                  <button class="btn btn-outline-danger btn-sm" type="button" (click)="cancelOrder(order)" [disabled]="isCancelling(order._id)">
+                    {{ isCancelling(order._id) ? 'Cancelling...' : 'Cancel Order' }}
+                  </button>
+                }
               </div>
             }
           </footer>

@@ -18,6 +18,7 @@ export class OrderHistory {
   readonly loading = signal(true);
   readonly error = signal('');
   readonly orders = signal<OrderResponse[]>([]);
+  readonly cancellingOrderIds = signal<string[]>([]);
 
   readonly isAdmin = computed(() => this.authService.role() === 'admin');
   readonly title = computed(() => (this.isAdmin() ? 'All Orders' : 'Your Order History'));
@@ -72,6 +73,36 @@ export class OrderHistory {
       },
       error: (err: { error?: { message?: string } }) => {
         this.error.set(err.error?.message || 'Unable to update order status.');
+      }
+    });
+  }
+
+  canCancel(order: OrderResponse): boolean {
+    return !this.isAdmin() && order.orderStatus === 'Processing';
+  }
+
+  isCancelling(orderId: string): boolean {
+    return this.cancellingOrderIds().includes(orderId);
+  }
+
+  cancelOrder(order: OrderResponse): void {
+    if (!this.canCancel(order) || this.isCancelling(order._id)) {
+      return;
+    }
+
+    this.error.set('');
+    this.cancellingOrderIds.update((ids) => [...ids, order._id]);
+
+    this.orderService.cancelOrder(order._id).subscribe({
+      next: (updatedOrder) => {
+        this.orders.update((orders) =>
+          orders.map((currentOrder) => (currentOrder._id === updatedOrder._id ? updatedOrder : currentOrder))
+        );
+        this.cancellingOrderIds.update((ids) => ids.filter((id) => id !== order._id));
+      },
+      error: (err: { error?: { message?: string } }) => {
+        this.error.set(err.error?.message || 'Unable to cancel this order right now.');
+        this.cancellingOrderIds.update((ids) => ids.filter((id) => id !== order._id));
       }
     });
   }

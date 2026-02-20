@@ -100,3 +100,26 @@ exports.updateOrderStatus = async (req, res) => {
     res.status(404).json({ message: "Order not found" });
   }
 };
+
+// ❌ User - Cancel Order (only while Processing)
+exports.cancelMyOrder = async (req, res) => {
+  const order = await Order.findById(req.params.id).populate("items.product");
+
+  if (!order) {
+    return res.status(404).json({ message: "Order not found" });
+  }
+
+  if (order.user.toString() !== req.user._id.toString()) {
+    return res.status(403).json({ message: "Not authorized for this order" });
+  }
+
+  if (order.orderStatus !== "Processing") {
+    return res.status(400).json({ message: "Only processing orders can be cancelled" });
+  }
+
+  order.orderStatus = "Cancelled";
+  await order.save();
+
+  const refreshedOrder = await Order.findById(order._id).populate("items.product");
+  res.json(refreshedOrder);
+};
