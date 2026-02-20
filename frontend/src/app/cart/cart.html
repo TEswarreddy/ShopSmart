@@ -8,7 +8,7 @@
 
 @if (cartService.items().length > 0) {
   <div class="list-group mb-3">
-    @for (item of cartService.items(); track item.product._id) {
+    @for (item of cartService.items(); track productId(item)) {
       <div class="list-group-item">
         <div class="d-flex justify-content-between align-items-start gap-3">
           <div>
@@ -18,14 +18,14 @@
           </div>
 
           <div class="d-flex align-items-center gap-2">
-            <button class="btn btn-outline-secondary btn-sm" (click)="decrease(item.product._id, item.quantity)">
+            <button class="btn btn-outline-secondary btn-sm" (click)="decrease(productId(item), item.quantity)">
               -
             </button>
             <span class="qty">{{ item.quantity }}</span>
-            <button class="btn btn-outline-secondary btn-sm" (click)="increase(item.product._id, item.quantity)">
+            <button class="btn btn-outline-secondary btn-sm" (click)="increase(productId(item), item.quantity)">
               +
             </button>
-            <button class="btn btn-outline-danger btn-sm" (click)="remove(item.product._id)">
+            <button class="btn btn-outline-danger btn-sm" (click)="remove(productId(item))">
               Remove
             </button>
           </div>
@@ -38,6 +38,7 @@
     <div>
       <p class="mb-0">Items: <strong>{{ cartService.totalItems() }}</strong></p>
       <p class="mb-0">Subtotal: <strong>₹{{ cartService.subtotal() }}</strong></p>
+      <p class="mb-0">Total Price: <strong>₹{{ cartService.subtotal() }}</strong></p>
     </div>
 
     <div class="d-flex gap-2">

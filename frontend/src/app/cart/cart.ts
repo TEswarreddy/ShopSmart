@@ -13,6 +13,14 @@ import { CartService } from '../services/cart';
 export class Cart {
   constructor(public cartService: CartService) {}
 
+  ngOnInit(): void {
+    this.cartService.refreshCart();
+  }
+
+  productId(item: { product: { _id?: string; id?: string } }): string {
+    return item.product._id || item.product.id || '';
+  }
+
   decrease(productId: string, currentQty: number): void {
     this.cartService.updateQuantity(productId, currentQty - 1);
   }
