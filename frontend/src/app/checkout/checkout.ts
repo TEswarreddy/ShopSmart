@@ -6,6 +6,8 @@ import { CartService } from '../services/cart';
 import { OrderService } from '../services/order';
 import { AuthService } from '../services/auth';
 
+const CHECKOUT_ADDRESS_KEY = 'shopsmart_checkout_address';
+
 interface RazorpayPaymentResponse {
   razorpay_order_id: string;
   razorpay_payment_id: string;
@@ -61,13 +63,14 @@ export class Checkout {
   placedOrderId = '';
   paymentOrderId = '';
   requiresPayment = false;
+  redirectingToOrders = false;
 
   readonly form = this.formBuilder.nonNullable.group({
     fullName: ['', [Validators.required, Validators.minLength(2)]],
-    phone: ['', [Validators.required, Validators.minLength(10)]],
+    phone: ['', [Validators.required, Validators.pattern(/^[0-9+\-\s]{10,15}$/)]],
     address: ['', [Validators.required, Validators.minLength(5)]],
     city: ['', [Validators.required]],
-    postalCode: ['', [Validators.required]],
+    postalCode: ['', [Validators.required, Validators.minLength(4)]],
     country: ['India', [Validators.required]],
     paymentMethod: ['COD' as 'COD' | 'ONLINE', [Validators.required]],
     saveAddress: [true]
@@ -83,7 +86,9 @@ export class Checkout {
     private orderService: OrderService,
     private router: Router,
     private authService: AuthService
-  ) {}
+  ) {
+    this.patchSavedAddress();
+  }
 
   submit(): void {
     if (this.cartService.items().length === 0) {
@@ -122,6 +127,10 @@ export class Checkout {
         next: (order) => {
           this.placedOrderId = order._id;
 
+          if (value.saveAddress) {
+            this.saveAddressLocally();
+          }
+
           if (value.paymentMethod === 'ONLINE') {
             this.requiresPayment = true;
             this.createPaymentOrder(order._id, value.fullName, value.phone);
@@ -129,8 +138,9 @@ export class Checkout {
           }
 
           this.loading = false;
-          this.successMessage = `Order placed successfully. Order ID: ${order._id}`;
+          this.successMessage = `Order placed successfully. Order ID: ${order._id}. Redirecting to My Orders...`;
           this.cartService.clearCart();
+          this.redirectToMyOrders();
         },
         error: (err: { error?: { message?: string } }) => {
           this.loading = false;
@@ -230,8 +240,9 @@ export class Checkout {
         next: () => {
           this.loading = false;
           this.requiresPayment = false;
-          this.successMessage = `Payment completed and order confirmed. Order ID: ${orderId}`;
+          this.successMessage = `Payment completed and order confirmed. Order ID: ${orderId}. Redirecting to My Orders...`;
           this.cartService.clearCart();
+          this.redirectToMyOrders();
         },
         error: (err: { error?: { message?: string } }) => {
           this.loading = false;
@@ -258,10 +269,70 @@ export class Checkout {
       return 'Please enter a valid value.';
     }
 
+    if (control.errors['pattern']) {
+      return 'Please enter a valid phone number.';
+    }
+
     return 'Invalid value.';
   }
 
   goToProducts(): void {
     void this.router.navigateByUrl('/');
+  }
+
+  goToMyOrders(): void {
+    void this.router.navigateByUrl('/orders');
+  }
+
+  private redirectToMyOrders(): void {
+    this.redirectingToOrders = true;
+
+    setTimeout(() => {
+      this.goToMyOrders();
+    }, 1200);
+  }
+
+  private saveAddressLocally(): void {
+    const value = this.form.getRawValue();
+
+    const address = {
+      fullName: value.fullName,
+      phone: value.phone,
+      address: value.address,
+      city: value.city,
+      postalCode: value.postalCode,
+      country: value.country
+    };
+
+    localStorage.setItem(CHECKOUT_ADDRESS_KEY, JSON.stringify(address));
+  }
+
+  private patchSavedAddress(): void {
+    const raw = localStorage.getItem(CHECKOUT_ADDRESS_KEY);
+    if (!raw) {
+      return;
+    }
+
+    try {
+      const saved = JSON.parse(raw) as {
+        fullName?: string;
+        phone?: string;
+        address?: string;
+        city?: string;
+        postalCode?: string;
+        country?: string;
+      };
+
+      this.form.patchValue({
+        fullName: saved.fullName || '',
+        phone: saved.phone || '',
+        address: saved.address || '',
+        city: saved.city || '',
+        postalCode: saved.postalCode || '',
+        country: saved.country || 'India'
+      });
+    } catch {
+      localStorage.removeItem(CHECKOUT_ADDRESS_KEY);
+    }
   }
 }

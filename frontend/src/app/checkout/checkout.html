@@ -17,7 +17,12 @@
         }
 
         @if (successMessage) {
-          <div class="alert alert-success" role="alert">{{ successMessage }}</div>
+          <div class="alert alert-success" role="alert">
+            {{ successMessage }}
+            <button type="button" class="btn btn-sm btn-success ms-2" (click)="goToMyOrders()">
+              Go to My Orders
+            </button>
+          </div>
         }
 
         @if (requiresPayment && placedOrderId) {
@@ -101,6 +106,11 @@
             <button class="btn btn-warning" type="submit" [disabled]="loading">
               {{ loading ? 'Processing...' : 'Place Order' }}
             </button>
+            @if (redirectingToOrders) {
+              <button class="btn btn-outline-success" type="button" (click)="goToMyOrders()">
+                Open My Orders
+              </button>
+            }
             <button class="btn btn-outline-secondary" type="button" (click)="goToProducts()">
               Continue Shopping
             </button>
