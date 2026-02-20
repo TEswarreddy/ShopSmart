@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { AuthService } from '../../services/auth';
+import { AuthService, USER_ROLES, UserRole } from '../../services/auth';
 
 @Component({
   selector: 'app-login',
@@ -16,6 +16,8 @@ export class Login {
 
   loading = false;
   error = '';
+  selectedRole: UserRole = 'user';
+  readonly roles = USER_ROLES;
 
   readonly form = this.formBuilder.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -26,7 +28,12 @@ export class Login {
     private authService: AuthService,
     private router: Router,
     private route: ActivatedRoute
-  ) {}
+  ) {
+    this.route.paramMap.subscribe((params) => {
+      this.selectedRole = this.resolveRole(params.get('role'));
+      this.error = '';
+    });
+  }
 
   submit(): void {
     if (this.form.invalid) {
@@ -37,9 +44,23 @@ export class Login {
     this.loading = true;
     this.error = '';
 
-    this.authService.login(this.form.getRawValue()).subscribe({
-      next: () => {
-        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/';
+    const payload = {
+      ...this.form.getRawValue(),
+      role: this.selectedRole
+    };
+
+    this.authService.login(payload).subscribe({
+      next: (user) => {
+        if (user.role !== this.selectedRole) {
+          this.error = `This account belongs to ${this.roleLabel(user.role)}. Please use the correct role sign in.`;
+          this.authService.logout();
+          this.loading = false;
+          return;
+        }
+
+        const returnUrl =
+          this.route.snapshot.queryParamMap.get('returnUrl') || this.authService.getDefaultRouteByRole(user.role);
+
         void this.router.navigateByUrl(returnUrl);
       },
       error: (err: { error?: { message?: string } }) => {
@@ -66,5 +87,31 @@ export class Login {
     }
 
     return 'Invalid value.';
+  }
+
+  routeForRole(role: UserRole): string {
+    return `/login/${role}`;
+  }
+
+  registerRouteForRole(role: UserRole): string {
+    return `/register/${role}`;
+  }
+
+  roleLabel(role: UserRole): string {
+    if (role === 'shop') {
+      return 'Shop';
+    }
+    if (role === 'admin') {
+      return 'Admin';
+    }
+    return 'User';
+  }
+
+  private resolveRole(roleParam: string | null): UserRole {
+    if (roleParam && USER_ROLES.includes(roleParam as UserRole)) {
+      return roleParam as UserRole;
+    }
+
+    return 'user';
   }
 }

@@ -25,31 +25,33 @@
 
 			<nav class="utility-nav d-none d-lg-flex">
 				@if (authService.user(); as user) {
-					<a class="utility-link" routerLink="/" (click)="closeMenu()">
+					<a class="utility-link" [routerLink]="dashboardRoute()" (click)="closeMenu()">
 						<span class="small-label">Hello, {{ user.name }}</span>
-						<strong>Account</strong>
+						<strong>{{ roleLabel(user.role) }} Account</strong>
 					</a>
 				} @else {
-					<a class="utility-link" routerLink="/login" (click)="closeMenu()">
+					<a class="utility-link" routerLink="/login/user" (click)="closeMenu()">
 						<span class="small-label">Hello, sign in</span>
-						<strong>Account</strong>
+						<strong>User Account</strong>
 					</a>
 				}
-				<a class="utility-link" routerLink="/" (click)="closeMenu()">
+				<a class="utility-link" [routerLink]="orderHistoryRoute()" (click)="closeMenu()">
 					<span class="small-label">Returns</span>
 					<strong>& Orders</strong>
 				</a>
-				<a class="utility-link cart-link" routerLink="/cart" routerLinkActive="active" (click)="closeMenu()">
-					Cart <span class="cart-badge">{{ cartService.totalItems() }}</span>
-				</a>
-				<a class="utility-link" routerLink="/checkout" (click)="closeMenu()">
-					<span class="small-label">Secure</span>
-					<strong>Checkout</strong>
-				</a>
+				@if (canAccessUserCommerce()) {
+					<a class="utility-link cart-link" routerLink="/cart" routerLinkActive="active" (click)="closeMenu()">
+						Cart <span class="cart-badge">{{ cartService.totalItems() }}</span>
+					</a>
+					<a class="utility-link" routerLink="/checkout" (click)="closeMenu()">
+						<span class="small-label">Secure</span>
+						<strong>Checkout</strong>
+					</a>
+				}
 				@if (authService.isLoggedIn()) {
 					<button class="utility-action" type="button" (click)="logout()">Logout</button>
 				} @else {
-					<a class="utility-action" routerLink="/register" (click)="closeMenu()">Register</a>
+					<a class="utility-action" routerLink="/register/user" (click)="closeMenu()">Register</a>
 				}
 			</nav>
 		</div>
@@ -57,11 +59,17 @@
 		<div class="header-sub">
 			<div class="container sub-inner" [class.open]="isMenuOpen">
 				<a class="sub-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMenu()">All Products</a>
-				<a class="sub-link" routerLink="/cart" routerLinkActive="active" (click)="closeMenu()">Your Cart</a>
-				<a class="sub-link" routerLink="/checkout" routerLinkActive="active" (click)="closeMenu()">Checkout</a>
+				@if (authService.isLoggedIn()) {
+					<a class="sub-link" [routerLink]="dashboardRoute()" routerLinkActive="active" (click)="closeMenu()">Dashboard</a>
+					<a class="sub-link" [routerLink]="orderHistoryRoute()" routerLinkActive="active" (click)="closeMenu()">Orders</a>
+				}
+				@if (canAccessUserCommerce()) {
+					<a class="sub-link" routerLink="/cart" routerLinkActive="active" (click)="closeMenu()">Your Cart</a>
+					<a class="sub-link" routerLink="/checkout" routerLinkActive="active" (click)="closeMenu()">Checkout</a>
+				}
 				@if (!authService.isLoggedIn()) {
-					<a class="sub-link" routerLink="/login" routerLinkActive="active" (click)="closeMenu()">Sign In</a>
-					<a class="sub-link" routerLink="/register" routerLinkActive="active" (click)="closeMenu()">Register</a>
+					<a class="sub-link" routerLink="/login/user" routerLinkActive="active" (click)="closeMenu()">Sign In</a>
+					<a class="sub-link" routerLink="/register/user" routerLinkActive="active" (click)="closeMenu()">Register</a>
 				}
 				<a class="sub-link" routerLink="/" (click)="closeMenu()">Today's Deals</a>
 				<a class="sub-link" routerLink="/" (click)="closeMenu()">Customer Service</a>

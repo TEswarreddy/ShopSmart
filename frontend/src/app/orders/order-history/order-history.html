@@ -1,0 +1,108 @@
+<section class="orders-shell">
+  <div class="orders-header">
+    <h1>{{ title() }}</h1>
+    <a class="btn btn-outline-secondary" routerLink="/">Continue Shopping</a>
+  </div>
+
+  @if (error()) {
+    <div class="alert alert-danger" role="alert">{{ error() }}</div>
+  }
+
+  @if (loading()) {
+    <div class="loading-state">Loading order history...</div>
+  }
+
+  @if (!loading() && orders().length === 0) {
+    <div class="empty-state">
+      <h2>No orders yet</h2>
+      <p>Your placed orders will appear here.</p>
+      <a class="btn btn-warning" routerLink="/">Start Shopping</a>
+    </div>
+  }
+
+  @if (!loading() && orders().length > 0) {
+    <div class="order-list">
+      @for (order of orders(); track order._id) {
+        <article class="order-card">
+          <header class="order-top">
+            <div>
+              <p class="meta-label">Order ID</p>
+              <p class="meta-value">{{ order._id }}</p>
+            </div>
+            <div>
+              <p class="meta-label">Placed On</p>
+              <p class="meta-value">{{ order.createdAt | date: 'medium' }}</p>
+            </div>
+            <div>
+              <p class="meta-label">Total</p>
+              <p class="meta-value">₹{{ order.totalPrice }}</p>
+            </div>
+          </header>
+
+          @if (isAdmin() && order.user) {
+            <div class="order-user">
+              <strong>{{ order.user.name }}</strong>
+              <span>{{ order.user.email }}</span>
+            </div>
+          }
+
+          <div class="items-grid">
+            @for (item of order.items; track item.product._id) {
+              <div class="item-row">
+                <div>
+                  <p class="item-title">{{ item.product.title }}</p>
+                  <p class="item-meta">Qty: {{ item.quantity }}</p>
+                </div>
+                <p class="item-price">₹{{ itemTotal(item.product.price, item.quantity) }}</p>
+              </div>
+            }
+          </div>
+
+          <div class="address-box">
+            <p class="meta-label">Shipping Address</p>
+            <p>
+              {{ order.shippingAddress.address }}, {{ order.shippingAddress.city }},
+              {{ order.shippingAddress.postalCode }}, {{ order.shippingAddress.country }}
+            </p>
+          </div>
+
+          <footer class="status-row">
+            <div>
+              <span class="meta-label">Payment Method</span>
+              <strong>{{ order.paymentMethod }}</strong>
+            </div>
+
+            @if (isAdmin()) {
+              <label class="status-control">
+                <span class="meta-label">Order Status</span>
+                <select class="form-select form-select-sm" [value]="order.orderStatus" (change)="updateOrder(order, $event, 'status')">
+                  @for (status of orderStatusOptions; track status) {
+                    <option [value]="status">{{ status }}</option>
+                  }
+                </select>
+              </label>
+
+              <label class="status-control">
+                <span class="meta-label">Payment Status</span>
+                <select class="form-select form-select-sm" [value]="order.paymentStatus" (change)="updateOrder(order, $event, 'paymentStatus')">
+                  @for (paymentStatus of paymentStatusOptions; track paymentStatus) {
+                    <option [value]="paymentStatus">{{ paymentStatus }}</option>
+                  }
+                </select>
+              </label>
+            } @else {
+              <div>
+                <span class="meta-label">Order Status</span>
+                <strong>{{ order.orderStatus }}</strong>
+              </div>
+              <div>
+                <span class="meta-label">Payment Status</span>
+                <strong>{{ order.paymentStatus }}</strong>
+              </div>
+            }
+          </footer>
+        </article>
+      }
+    </div>
+  }
+</section>

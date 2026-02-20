@@ -8,6 +8,14 @@ exports.createPaymentOrder = async (req, res) => {
 
   const order = await Order.findById(orderId);
 
+  if (!order) {
+    return res.status(404).json({ message: "Order not found" });
+  }
+
+  if (order.user.toString() !== req.user._id.toString()) {
+    return res.status(403).json({ message: "Not authorized for this order" });
+  }
+
   const options = {
     amount: order.totalPrice * 100, // in paise
     currency: "INR",
@@ -20,6 +28,7 @@ exports.createPaymentOrder = async (req, res) => {
     razorpayOrderId: razorpayOrder.id,
     amount: razorpayOrder.amount,
     currency: razorpayOrder.currency,
+    keyId: process.env.RAZORPAY_KEY_ID,
   });
 };
 
@@ -39,6 +48,15 @@ exports.verifyPayment = async (req, res) => {
 
   if (generatedSignature === razorpay_signature) {
     const order = await Order.findById(orderId);
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    if (order.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Not authorized for this order" });
+    }
+
     order.paymentStatus = "Completed";
     order.orderStatus = "Paid";
     await order.save();

@@ -20,6 +20,15 @@
           <div class="alert alert-success" role="alert">{{ successMessage }}</div>
         }
 
+        @if (requiresPayment && placedOrderId) {
+          <div class="alert alert-warning" role="alert">
+            Order is created but payment is pending. Complete payment to confirm your order.
+            <button type="button" class="btn btn-sm btn-dark ms-2" (click)="retryPayment()" [disabled]="loading">
+              Pay now
+            </button>
+          </div>
+        }
+
         <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
           <div class="mb-3">
             <label class="form-label" for="fullName">Full name</label>

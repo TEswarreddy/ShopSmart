@@ -2,6 +2,21 @@
   <div class="auth-card">
     <h1 class="auth-title">Sign In</h1>
 
+    <div class="role-switch" role="tablist" aria-label="Select account role">
+      @for (role of roles; track role) {
+        <a
+          class="role-chip"
+          [class.active]="selectedRole === role"
+          [routerLink]="routeForRole(role)"
+          [attr.aria-selected]="selectedRole === role"
+        >
+          {{ roleLabel(role) }}
+        </a>
+      }
+    </div>
+
+    <p class="role-caption">Signing in as {{ roleLabel(selectedRole) }}</p>
+
     @if (error) {
       <div class="alert alert-danger" role="alert">{{ error }}</div>
     }
@@ -30,7 +45,7 @@
 
     <p class="auth-switch mt-3 mb-0">
       New to ShopSmart?
-      <a routerLink="/register">Create your account</a>
+      <a [routerLink]="registerRouteForRole(selectedRole)">Create your {{ roleLabel(selectedRole) }} account</a>
     </p>
   </div>
 </section>

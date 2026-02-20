@@ -5,22 +5,29 @@ import { environment } from './environment';
 
 const AUTH_KEY = 'shopsmart_auth_user';
 
+export type UserRole = 'user' | 'shop' | 'admin';
+
+export const USER_ROLES: UserRole[] = ['user', 'shop', 'admin'];
+
 export interface AuthUser {
   _id: string;
   name: string;
   email: string;
+  role: UserRole;
   token: string;
 }
 
 export interface LoginPayload {
   email: string;
   password: string;
+  role: UserRole;
 }
 
 export interface RegisterPayload {
   name: string;
   email: string;
   password: string;
+  role: UserRole;
 }
 
 @Injectable({
@@ -31,6 +38,7 @@ export class AuthService {
 
   readonly user = this.userSignal.asReadonly();
   readonly isLoggedIn = computed(() => !!this.userSignal()?.token);
+  readonly role = computed<UserRole | null>(() => this.userSignal()?.role ?? null);
 
   constructor(private http: HttpClient) {}
 
@@ -53,6 +61,22 @@ export class AuthService {
 
   getToken(): string | null {
     return this.userSignal()?.token ?? null;
+  }
+
+  isRole(role: UserRole): boolean {
+    return this.userSignal()?.role === role;
+  }
+
+  getDefaultRouteByRole(role?: UserRole | null): string {
+    const resolvedRole = role ?? this.userSignal()?.role;
+
+    if (resolvedRole === 'admin') {
+      return '/admin/dashboard';
+    }
+    if (resolvedRole === 'shop') {
+      return '/shop/dashboard';
+    }
+    return '/user/dashboard';
   }
 
   private setSession(user: AuthUser): void {

@@ -23,16 +23,47 @@ export interface PlaceOrderPayload {
 
 export interface OrderResponse {
   _id: string;
+  user?: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+  items: Array<{
+    product: {
+      _id: string;
+      title: string;
+      price: number;
+      image?: string;
+      category?: string;
+    };
+    quantity: number;
+  }>;
   totalPrice: number;
+  shippingAddress: ShippingAddress;
   paymentMethod: string;
   paymentStatus: string;
   orderStatus: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface PaymentOrderResponse {
   razorpayOrderId: string;
   amount: number;
   currency: string;
+  keyId: string;
+}
+
+export interface VerifyPaymentPayload {
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+  orderId: string;
+}
+
+export interface UpdateOrderStatusPayload {
+  status?: string;
+  paymentStatus?: string;
 }
 
 @Injectable({
@@ -49,5 +80,21 @@ export class OrderService {
     return this.http.post<PaymentOrderResponse>(`${environment.apiUrl}/payment/create-order`, {
       orderId
     });
+  }
+
+  getMyOrders(): Observable<OrderResponse[]> {
+    return this.http.get<OrderResponse[]>(`${environment.apiUrl}/orders/myorders`);
+  }
+
+  getAllOrders(): Observable<OrderResponse[]> {
+    return this.http.get<OrderResponse[]>(`${environment.apiUrl}/orders`);
+  }
+
+  updateOrderStatus(orderId: string, payload: UpdateOrderStatusPayload): Observable<OrderResponse> {
+    return this.http.put<OrderResponse>(`${environment.apiUrl}/orders/${orderId}`, payload);
+  }
+
+  verifyPayment(payload: VerifyPaymentPayload): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${environment.apiUrl}/payment/verify`, payload);
   }
 }

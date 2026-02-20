@@ -1,0 +1,25 @@
+<section class="dashboard-shell">
+  <div class="dashboard-card">
+    <p class="welcome">Welcome, {{ authService.user()?.name }}</p>
+    <h1>{{ heading() }}</h1>
+    <p class="desc">{{ description() }}</p>
+
+    <div class="meta-grid">
+      <div>
+        <span class="meta-label">Role</span>
+        <strong>{{ authService.role() | titlecase }}</strong>
+      </div>
+      <div>
+        <span class="meta-label">Email</span>
+        <strong>{{ authService.user()?.email }}</strong>
+      </div>
+    </div>
+
+    <div class="actions">
+      <a class="btn btn-warning" [routerLink]="primaryRoute()">{{ primaryLabel() }}</a>
+      @if (authService.role() === 'user') {
+        <a class="btn btn-outline-dark" routerLink="/cart">Open Cart</a>
+      }
+    </div>
+  </div>
+</section>

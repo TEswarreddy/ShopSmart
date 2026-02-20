@@ -2,13 +2,28 @@
   <div class="auth-card">
     <h1 class="auth-title">Create account</h1>
 
+    <div class="role-switch" role="tablist" aria-label="Select account role">
+      @for (role of roles; track role) {
+        <a
+          class="role-chip"
+          [class.active]="selectedRole === role"
+          [routerLink]="routeForRole(role)"
+          [attr.aria-selected]="selectedRole === role"
+        >
+          {{ roleLabel(role) }}
+        </a>
+      }
+    </div>
+
+    <p class="role-caption">Creating a {{ roleLabel(selectedRole) }} account</p>
+
     @if (error) {
       <div class="alert alert-danger" role="alert">{{ error }}</div>
     }
 
     <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
       <div class="mb-3">
-        <label for="name" class="form-label">Your name</label>
+        <label for="name" class="form-label">{{ nameLabel() }}</label>
         <input id="name" type="text" class="form-control" formControlName="name" />
         @if (fieldError('name')) {
           <small class="text-danger">{{ fieldError('name') }}</small>
@@ -40,13 +55,13 @@
       </div>
 
       <button class="btn btn-warning w-100" type="submit" [disabled]="loading">
-        {{ loading ? 'Creating account...' : 'Create your ShopSmart account' }}
+        {{ loading ? 'Creating account...' : submitLabel() }}
       </button>
     </form>
 
     <p class="auth-switch mt-3 mb-0">
       Already have an account?
-      <a routerLink="/login">Sign in</a>
+      <a [routerLink]="loginRouteForRole(selectedRole)">Sign in as {{ roleLabel(selectedRole) }}</a>
     </p>
   </div>
 </section>

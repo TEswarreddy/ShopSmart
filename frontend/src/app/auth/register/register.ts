@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { AuthService } from '../../services/auth';
+import { AuthService, USER_ROLES, UserRole } from '../../services/auth';
 
 @Component({
   selector: 'app-register',
@@ -16,6 +16,8 @@ export class Register {
 
   loading = false;
   error = '';
+  selectedRole: UserRole = 'user';
+  readonly roles = USER_ROLES;
 
   readonly form = this.formBuilder.nonNullable.group({
     name: ['', [Validators.required, Validators.minLength(2)]],
@@ -28,7 +30,12 @@ export class Register {
     private authService: AuthService,
     private router: Router,
     private route: ActivatedRoute
-  ) {}
+  ) {
+    this.route.paramMap.subscribe((params) => {
+      this.selectedRole = this.resolveRole(params.get('role'));
+      this.error = '';
+    });
+  }
 
   submit(): void {
     if (this.form.invalid) {
@@ -46,10 +53,16 @@ export class Register {
     this.error = '';
 
     this.authService
-      .register({ name: value.name, email: value.email, password: value.password })
+      .register({
+        name: value.name,
+        email: value.email,
+        password: value.password,
+        role: this.selectedRole
+      })
       .subscribe({
-        next: () => {
-          const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/';
+        next: (user) => {
+          const returnUrl =
+            this.route.snapshot.queryParamMap.get('returnUrl') || this.authService.getDefaultRouteByRole(user.role);
           void this.router.navigateByUrl(returnUrl);
         },
         error: (err: { error?: { message?: string } }) => {
@@ -88,5 +101,45 @@ export class Register {
       return 'Confirm password';
     }
     return label.charAt(0).toUpperCase() + label.slice(1);
+  }
+
+  routeForRole(role: UserRole): string {
+    return `/register/${role}`;
+  }
+
+  loginRouteForRole(role: UserRole): string {
+    return `/login/${role}`;
+  }
+
+  roleLabel(role: UserRole): string {
+    if (role === 'shop') {
+      return 'Shop';
+    }
+    if (role === 'admin') {
+      return 'Admin';
+    }
+    return 'User';
+  }
+
+  nameLabel(): string {
+    return this.selectedRole === 'shop' ? 'Shop name' : 'Your name';
+  }
+
+  submitLabel(): string {
+    if (this.selectedRole === 'admin') {
+      return 'Create your Admin account';
+    }
+    if (this.selectedRole === 'shop') {
+      return 'Create your Shop account';
+    }
+    return 'Create your User account';
+  }
+
+  private resolveRole(roleParam: string | null): UserRole {
+    if (roleParam && USER_ROLES.includes(roleParam as UserRole)) {
+      return roleParam as UserRole;
+    }
+
+    return 'user';
   }
 }
