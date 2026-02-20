@@ -7,7 +7,7 @@ export const roleGuard: CanActivateFn = (route: ActivatedRouteSnapshot, state: R
   const router = inject(Router);
 
   if (!authService.isLoggedIn()) {
-    return router.createUrlTree(['/login'], {
+    return router.createUrlTree(['/login/user'], {
       queryParams: { returnUrl: state.url }
     });
   }

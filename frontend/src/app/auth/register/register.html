@@ -3,7 +3,7 @@
     <h1 class="auth-title">Create account</h1>
 
     <div class="role-switch" role="tablist" aria-label="Select account role">
-      @for (role of roles; track role) {
+      @for (role of registerRoles; track role) {
         <a
           class="role-chip"
           [class.active]="selectedRole === role"
@@ -21,43 +21,202 @@
       <div class="alert alert-danger" role="alert">{{ error }}</div>
     }
 
-    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
-      <div class="mb-3">
-        <label for="name" class="form-label">{{ nameLabel() }}</label>
-        <input id="name" type="text" class="form-control" formControlName="name" />
-        @if (fieldError('name')) {
-          <small class="text-danger">{{ fieldError('name') }}</small>
+    <form [formGroup]="form" (ngSubmit)="submit()" class="auth-form" novalidate>
+      @if (selectedRole === 'user') {
+        <div class="form-grid two-col">
+          <div>
+            <label for="fullName" class="form-label">Full Name</label>
+            <input id="fullName" type="text" class="form-control" formControlName="fullName" />
+            @if (fieldError('fullName')) {
+              <small class="text-danger">{{ fieldError('fullName') }}</small>
+            }
+          </div>
+
+          <div>
+            <label for="phone" class="form-label">Phone Number</label>
+            <input id="phone" type="tel" class="form-control" formControlName="phone" />
+            @if (fieldError('phone')) {
+              <small class="text-danger">{{ fieldError('phone') }}</small>
+            }
+          </div>
+
+          <div>
+            <label for="gender" class="form-label">Gender</label>
+            <select id="gender" class="form-select" formControlName="gender">
+              <option value="">Prefer not to say</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="dateOfBirth" class="form-label">Date of Birth</label>
+            <input id="dateOfBirth" type="date" class="form-control" formControlName="dateOfBirth" />
+          </div>
+        </div>
+      }
+
+      @if (selectedRole === 'shop') {
+        <div class="section-title">Business Information</div>
+        <div class="form-grid two-col">
+          <div>
+            <label for="shopName" class="form-label">Shop Name</label>
+            <input id="shopName" type="text" class="form-control" formControlName="shopName" />
+            @if (fieldError('shopName')) {
+              <small class="text-danger">{{ fieldError('shopName') }}</small>
+            }
+          </div>
+
+          <div>
+            <label for="ownerName" class="form-label">Owner Name</label>
+            <input id="ownerName" type="text" class="form-control" formControlName="ownerName" />
+            @if (fieldError('ownerName')) {
+              <small class="text-danger">{{ fieldError('ownerName') }}</small>
+            }
+          </div>
+
+          <div>
+            <label for="businessType" class="form-label">Business Type</label>
+            <select id="businessType" class="form-select" formControlName="businessType">
+              <option value="">Select type</option>
+              <option value="Retail">Retail</option>
+              <option value="Wholesale">Wholesale</option>
+              <option value="Electronics">Electronics</option>
+              <option value="Fashion">Fashion</option>
+              <option value="Grocery">Grocery</option>
+              <option value="Other">Other</option>
+            </select>
+            @if (fieldError('businessType')) {
+              <small class="text-danger">{{ fieldError('businessType') }}</small>
+            }
+          </div>
+
+          <div>
+            <label for="gstNumber" class="form-label">GST Number (Optional)</label>
+            <input id="gstNumber" type="text" class="form-control" formControlName="gstNumber" />
+          </div>
+        </div>
+      }
+
+      <div class="section-title">Contact Details</div>
+      <div class="form-grid two-col">
+        <div>
+          <label for="email" class="form-label">Email</label>
+          <input id="email" type="email" class="form-control" formControlName="email" />
+          @if (fieldError('email')) {
+            <small class="text-danger">{{ fieldError('email') }}</small>
+          }
+        </div>
+
+        @if (selectedRole === 'shop') {
+          <div>
+            <label for="shopPhone" class="form-label">Business Phone</label>
+            <input id="shopPhone" type="tel" class="form-control" formControlName="phone" />
+            @if (fieldError('phone')) {
+              <small class="text-danger">{{ fieldError('phone') }}</small>
+            }
+          </div>
+        }
+
+        <div>
+          <label for="city" class="form-label">City</label>
+          <input id="city" type="text" class="form-control" formControlName="city" />
+          @if (fieldError('city')) {
+            <small class="text-danger">{{ fieldError('city') }}</small>
+          }
+        </div>
+
+        <div>
+          <label for="state" class="form-label">State</label>
+          <input id="state" type="text" class="form-control" formControlName="state" />
+          @if (fieldError('state')) {
+            <small class="text-danger">{{ fieldError('state') }}</small>
+          }
+        </div>
+
+        <div>
+          <label for="country" class="form-label">Country</label>
+          <input id="country" type="text" class="form-control" formControlName="country" />
+          @if (fieldError('country')) {
+            <small class="text-danger">{{ fieldError('country') }}</small>
+          }
+        </div>
+
+        @if (selectedRole === 'shop') {
+          <div>
+            <label for="postalCode" class="form-label">Postal Code</label>
+            <input id="postalCode" type="text" class="form-control" formControlName="postalCode" />
+            @if (fieldError('postalCode')) {
+              <small class="text-danger">{{ fieldError('postalCode') }}</small>
+            }
+          </div>
+
+          <div class="full-width">
+            <label for="addressLine1" class="form-label">Address Line 1</label>
+            <input id="addressLine1" type="text" class="form-control" formControlName="addressLine1" />
+            @if (fieldError('addressLine1')) {
+              <small class="text-danger">{{ fieldError('addressLine1') }}</small>
+            }
+          </div>
+
+          <div class="full-width">
+            <label for="addressLine2" class="form-label">Address Line 2 (Optional)</label>
+            <input id="addressLine2" type="text" class="form-control" formControlName="addressLine2" />
+          </div>
+
+          <div class="full-width">
+            <label for="website" class="form-label">Website (Optional)</label>
+            <input id="website" type="url" class="form-control" formControlName="website" placeholder="https://yourshop.com" />
+          </div>
         }
       </div>
 
-      <div class="mb-3">
-        <label for="email" class="form-label">Email</label>
-        <input id="email" type="email" class="form-control" formControlName="email" />
-        @if (fieldError('email')) {
-          <small class="text-danger">{{ fieldError('email') }}</small>
-        }
+      <div class="section-title">Security</div>
+      <div class="form-grid two-col">
+        <div>
+          <label for="password" class="form-label">Password</label>
+          <div class="password-wrap">
+            <input id="password" [type]="showPassword ? 'text' : 'password'" class="form-control" formControlName="password" />
+            <button class="btn btn-sm btn-outline-secondary" type="button" (click)="togglePassword()">
+              {{ showPassword ? 'Hide' : 'Show' }}
+            </button>
+          </div>
+          @if (fieldError('password')) {
+            <small class="text-danger">{{ fieldError('password') }}</small>
+          }
+        </div>
+
+        <div>
+          <label for="confirmPassword" class="form-label">Confirm Password</label>
+          <div class="password-wrap">
+            <input id="confirmPassword" [type]="showConfirmPassword ? 'text' : 'password'" class="form-control" formControlName="confirmPassword" />
+            <button class="btn btn-sm btn-outline-secondary" type="button" (click)="toggleConfirmPassword()">
+              {{ showConfirmPassword ? 'Hide' : 'Show' }}
+            </button>
+          </div>
+          @if (fieldError('confirmPassword')) {
+            <small class="text-danger">{{ fieldError('confirmPassword') }}</small>
+          }
+        </div>
       </div>
 
-      <div class="mb-3">
-        <label for="password" class="form-label">Password</label>
-        <input id="password" type="password" class="form-control" formControlName="password" />
-        @if (fieldError('password')) {
-          <small class="text-danger">{{ fieldError('password') }}</small>
-        }
-      </div>
-
-      <div class="mb-3">
-        <label for="confirmPassword" class="form-label">Re-enter password</label>
-        <input id="confirmPassword" type="password" class="form-control" formControlName="confirmPassword" />
-        @if (fieldError('confirmPassword')) {
-          <small class="text-danger">{{ fieldError('confirmPassword') }}</small>
-        }
-      </div>
+      <label class="form-check mt-2 mb-3">
+        <input class="form-check-input" type="checkbox" formControlName="acceptTerms" />
+        <span class="form-check-label">I agree to ShopSmart terms and privacy policy.</span>
+      </label>
+      @if (fieldError('acceptTerms')) {
+        <small class="text-danger d-block mb-2">{{ fieldError('acceptTerms') }}</small>
+      }
 
       <button class="btn btn-warning w-100" type="submit" [disabled]="loading">
         {{ loading ? 'Creating account...' : submitLabel() }}
       </button>
     </form>
+
+    @if (selectedRole === 'shop') {
+      <p class="shop-note mt-3 mb-0">Your shop details help us verify your seller profile faster.</p>
+    }
 
     <p class="auth-switch mt-3 mb-0">
       Already have an account?

@@ -21,8 +21,8 @@
       <div class="alert alert-danger" role="alert">{{ error }}</div>
     }
 
-    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
-      <div class="mb-3">
+    <form [formGroup]="form" (ngSubmit)="submit()" class="auth-form" novalidate>
+      <div>
         <label for="email" class="form-label">Email</label>
         <input id="email" type="email" class="form-control" formControlName="email" />
         @if (fieldError('email')) {
@@ -30,13 +30,20 @@
         }
       </div>
 
-      <div class="mb-3">
+      <div>
         <label for="password" class="form-label">Password</label>
-        <input id="password" type="password" class="form-control" formControlName="password" />
+        <div class="password-wrap">
+          <input id="password" [type]="showPassword ? 'text' : 'password'" class="form-control" formControlName="password" />
+          <button class="btn btn-sm btn-outline-secondary" type="button" (click)="togglePassword()">
+            {{ showPassword ? 'Hide' : 'Show' }}
+          </button>
+        </div>
         @if (fieldError('password')) {
           <small class="text-danger">{{ fieldError('password') }}</small>
         }
       </div>
+
+      <p class="auth-note">Use role-specific login for User, Shop, or Admin access.</p>
 
       <button class="btn btn-warning w-100" type="submit" [disabled]="loading">
         {{ loading ? 'Signing in...' : 'Sign In' }}
@@ -45,7 +52,9 @@
 
     <p class="auth-switch mt-3 mb-0">
       New to ShopSmart?
-      <a [routerLink]="registerRouteForRole(selectedRole)">Create your {{ roleLabel(selectedRole) }} account</a>
+      <a [routerLink]="registerRouteForRole(selectedRole)">
+        Create your {{ selectedRole === 'admin' ? 'User' : roleLabel(selectedRole) }} account
+      </a>
     </p>
   </div>
 </section>

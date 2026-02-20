@@ -13,7 +13,21 @@ export interface AuthUser {
   _id: string;
   name: string;
   email: string;
+  phone?: string;
   role: UserRole;
+  shopDetails?: {
+    shopName?: string;
+    ownerName?: string;
+    businessType?: string;
+    gstNumber?: string;
+    addressLine1?: string;
+    addressLine2?: string;
+    city?: string;
+    state?: string;
+    postalCode?: string;
+    country?: string;
+    website?: string;
+  };
   token: string;
 }
 
@@ -23,12 +37,38 @@ export interface LoginPayload {
   role: UserRole;
 }
 
-export interface RegisterPayload {
-  name: string;
+export interface UserRegisterPayload {
+  role: 'user';
+  fullName: string;
   email: string;
+  phone: string;
+  city: string;
+  state: string;
+  country: string;
+  gender?: string;
+  dateOfBirth?: string;
   password: string;
-  role: UserRole;
 }
+
+export interface ShopRegisterPayload {
+  role: 'shop';
+  shopName: string;
+  ownerName: string;
+  email: string;
+  phone: string;
+  businessType: string;
+  gstNumber?: string;
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+  website?: string;
+  password: string;
+}
+
+export type RegisterPayload = UserRegisterPayload | ShopRegisterPayload;
 
 @Injectable({
   providedIn: 'root'
@@ -93,6 +133,7 @@ export class AuthService {
     try {
       return JSON.parse(raw) as AuthUser;
     } catch {
+      localStorage.removeItem(AUTH_KEY);
       return null;
     }
   }

@@ -18,6 +18,7 @@ export class Login {
   error = '';
   selectedRole: UserRole = 'user';
   readonly roles = USER_ROLES;
+  showPassword = false;
 
   readonly form = this.formBuilder.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -94,6 +95,9 @@ export class Login {
   }
 
   registerRouteForRole(role: UserRole): string {
+    if (role === 'shop') {
+      return '/register/shop';
+    }
     return `/register/${role}`;
   }
 
@@ -113,5 +117,9 @@ export class Login {
     }
 
     return 'user';
+  }
+
+  togglePassword(): void {
+    this.showPassword = !this.showPassword;
   }
 }
