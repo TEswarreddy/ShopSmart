@@ -43,6 +43,8 @@ export interface OrderResponse {
   paymentMethod: string;
   paymentStatus: string;
   orderStatus: string;
+  shopTotalPrice?: number;
+  shopItemCount?: number;
   createdAt: string;
   updatedAt: string;
 }

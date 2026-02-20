@@ -2,6 +2,36 @@ const Order = require("../models/Order");
 const Cart = require("../models/Cart");
 const Product = require("../models/Product");
 
+const getShopProductIdSet = async (shopId) => {
+  const products = await Product.find({ shop: shopId }).select("_id");
+  return new Set(products.map((product) => product._id.toString()));
+};
+
+const buildShopScopedOrder = (order, shopProductIds) => {
+  const source = order.toObject ? order.toObject() : order;
+
+  const filteredItems = (source.items || []).filter(
+    (item) => item.product && shopProductIds.has(item.product._id.toString())
+  );
+
+  if (filteredItems.length === 0) {
+    return null;
+  }
+
+  const shopTotalPrice = filteredItems.reduce((sum, item) => {
+    const unitPrice = Number(item.product?.price || 0);
+    const quantity = Number(item.quantity || 0);
+    return sum + unitPrice * quantity;
+  }, 0);
+
+  return {
+    ...source,
+    items: filteredItems,
+    shopTotalPrice,
+    shopItemCount: filteredItems.reduce((sum, item) => sum + Number(item.quantity || 0), 0),
+  };
+};
+
 // 🧾 Place Order
 exports.placeOrder = async (req, res) => {
   const { shippingAddress, paymentMethod, items: requestItems } = req.body;
@@ -125,20 +155,23 @@ exports.cancelMyOrder = async (req, res) => {
 };
 
 exports.getShopOrders = async (req, res) => {
-  const products = await Product.find({ shop: req.user._id }).select("_id");
-  const productIds = products.map((product) => product._id);
+  const shopProductIds = await getShopProductIdSet(req.user._id);
+  const productIds = Array.from(shopProductIds);
 
   const orders = await Order.find({ "items.product": { $in: productIds } })
     .populate("user", "name email")
     .populate("items.product")
     .sort({ createdAt: -1 });
 
-  res.json(orders);
+  const scopedOrders = orders
+    .map((order) => buildShopScopedOrder(order, shopProductIds))
+    .filter(Boolean);
+
+  res.json(scopedOrders);
 };
 
 exports.updateShopOrderStatus = async (req, res) => {
-  const products = await Product.find({ shop: req.user._id }).select("_id");
-  const productIds = products.map((product) => product._id.toString());
+  const shopProductIds = await getShopProductIdSet(req.user._id);
 
   const order = await Order.findById(req.params.id).populate("items.product");
 
@@ -147,7 +180,7 @@ exports.updateShopOrderStatus = async (req, res) => {
   }
 
   const hasShopItem = order.items.some(
-    (item) => item.product && productIds.includes(item.product._id.toString())
+    (item) => item.product && shopProductIds.has(item.product._id.toString())
   );
 
   if (!hasShopItem) {
@@ -162,43 +195,37 @@ exports.updateShopOrderStatus = async (req, res) => {
     .populate("user", "name email")
     .populate("items.product");
 
-  res.json(updated);
+  const scopedOrder = buildShopScopedOrder(updated, shopProductIds);
+  res.json(scopedOrder);
 };
 
 exports.getShopSalesReport = async (req, res) => {
-  const products = await Product.find({ shop: req.user._id }).select("_id");
-  const productIds = products.map((product) => product._id.toString());
+  const shopProductIds = await getShopProductIdSet(req.user._id);
+  const productIds = Array.from(shopProductIds);
 
-  const orders = await Order.find({ "items.product": { $in: products.map((product) => product._id) } })
+  const orders = await Order.find({ "items.product": { $in: productIds } })
+    .populate("user", "name email")
     .populate("items.product")
     .sort({ createdAt: -1 });
+
+  const scopedOrders = orders
+    .map((order) => buildShopScopedOrder(order, shopProductIds))
+    .filter(Boolean);
 
   let totalSales = 0;
   let totalOrders = 0;
   let totalItemsSold = 0;
 
-  for (const order of orders) {
-    let shopOrderAmount = 0;
-    let hasShopItem = false;
-
-    for (const item of order.items) {
-      if (item.product && productIds.includes(item.product._id.toString())) {
-        hasShopItem = true;
-        shopOrderAmount += item.product.price * item.quantity;
-        totalItemsSold += item.quantity;
-      }
-    }
-
-    if (hasShopItem) {
-      totalOrders += 1;
-      totalSales += shopOrderAmount;
-    }
+  for (const order of scopedOrders) {
+    totalOrders += 1;
+    totalSales += Number(order.shopTotalPrice || 0);
+    totalItemsSold += Number(order.shopItemCount || 0);
   }
 
   res.json({
     totalSales,
     totalOrders,
     totalItemsSold,
-    recentOrders: orders.slice(0, 10),
+    recentOrders: scopedOrders.slice(0, 10),
   });
 };

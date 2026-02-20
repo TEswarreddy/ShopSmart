@@ -143,8 +143,13 @@
                         <strong>Order #{{ order._id.slice(-6) }}</strong>
                         <small class="text-muted">{{ order.createdAt | date: 'mediumDate' }}</small>
                       </div>
-                      <div class="small mb-1">Total: {{ order.totalPrice | currency: 'INR' : 'symbol' : '1.0-0' }}</div>
+                      <div class="small mb-1">Your Total: {{ (order.shopTotalPrice ?? order.totalPrice) | currency: 'INR' : 'symbol' : '1.0-0' }}</div>
                       <div class="small text-muted">Order Status: {{ order.orderStatus }} • Payment: {{ order.paymentStatus }}</div>
+                      <ul class="item-list mt-2">
+                        @for (item of order.items; track item.product._id) {
+                          <li>{{ item.product.title }} × {{ item.quantity }}</li>
+                        }
+                      </ul>
                     </article>
                   }
                 </div>
@@ -165,7 +170,13 @@
                         <strong>Order #{{ order._id.slice(-6) }}</strong>
                         <small class="text-muted">{{ order.createdAt | date: 'mediumDate' }}</small>
                       </div>
-                      <div class="small mb-2">Total: {{ order.totalPrice | currency: 'INR' : 'symbol' : '1.0-0' }}</div>
+                      <div class="small mb-2">Your Total: {{ (order.shopTotalPrice ?? order.totalPrice) | currency: 'INR' : 'symbol' : '1.0-0' }}</div>
+
+                      <ul class="item-list mb-2">
+                        @for (item of order.items; track item.product._id) {
+                          <li>{{ item.product.title }} × {{ item.quantity }}</li>
+                        }
+                      </ul>
 
                       <div class="d-flex gap-2 flex-wrap">
                         <select #statusSelect class="form-select form-select-sm status-select">
@@ -218,7 +229,7 @@
                     @for (order of salesReport.recentOrders; track order._id) {
                       <li class="list-group-item px-0 d-flex justify-content-between">
                         <span>#{{ order._id.slice(-6) }} • {{ order.orderStatus }}</span>
-                        <strong>{{ order.totalPrice | currency: 'INR' : 'symbol' : '1.0-0' }}</strong>
+                        <strong>{{ (order.shopTotalPrice ?? order.totalPrice) | currency: 'INR' : 'symbol' : '1.0-0' }}</strong>
                       </li>
                     }
                   </ul>
