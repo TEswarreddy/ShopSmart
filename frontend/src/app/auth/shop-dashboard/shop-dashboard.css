@@ -109,6 +109,14 @@
   min-width: 150px;
 }
 
+.upload-preview {
+  width: min(100%, 180px);
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
 @media (max-width: 768px) {
   .shop-dashboard-wrap {
     grid-template-columns: 1fr;

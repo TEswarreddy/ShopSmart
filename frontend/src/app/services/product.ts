@@ -72,5 +72,11 @@ export class Product {
   deleteShopProduct(productId: string): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(`${environment.apiUrl}/products/shop/${productId}`);
   }
+
+  uploadShopProductImage(file: File): Observable<{ imageUrl: string }> {
+    const formData = new FormData();
+    formData.append('image', file);
+    return this.http.post<{ imageUrl: string }>(`${environment.apiUrl}/products/shop/upload-image`, formData);
+  }
 }
 

@@ -52,7 +52,14 @@
                 <input class="form-control" type="number" min="0" placeholder="Price" [(ngModel)]="productForm.price" />
                 <input class="form-control" placeholder="Category" [(ngModel)]="productForm.category" />
                 <input class="form-control" type="number" min="0" placeholder="Stock" [(ngModel)]="productForm.stock" />
-                <input class="form-control full-width" placeholder="Image URL" [(ngModel)]="productForm.image" />
+                <div class="full-width">
+                  <label class="form-label mb-1">Upload Image</label>
+                  <input class="form-control" type="file" accept="image/*" (change)="onAddProductImageSelected($event)" [disabled]="uploadingAddImage" />
+                  <small class="text-muted">{{ uploadingAddImage ? 'Uploading image...' : 'PNG/JPG/WebP up to 5MB' }}</small>
+                  @if (productForm.image) {
+                    <img [src]="productForm.image" alt="Product preview" class="upload-preview mt-2" />
+                  }
+                </div>
                 <textarea class="form-control full-width" rows="3" placeholder="Description" [(ngModel)]="productForm.description"></textarea>
               </div>
               <button class="btn btn-warning mt-2" type="button" [disabled]="savingProduct" (click)="addProduct()">
@@ -104,7 +111,14 @@
                     <input class="form-control" type="number" min="0" placeholder="Price" [(ngModel)]="selectedProduct.price" />
                     <input class="form-control" placeholder="Category" [(ngModel)]="selectedProduct.category" />
                     <input class="form-control" type="number" min="0" placeholder="Stock" [(ngModel)]="selectedProduct.stock" />
-                    <input class="form-control full-width" placeholder="Image URL" [(ngModel)]="selectedProduct.image" />
+                    <div class="full-width">
+                      <label class="form-label mb-1">Upload Image</label>
+                      <input class="form-control" type="file" accept="image/*" (change)="onEditProductImageSelected($event)" [disabled]="uploadingEditImage" />
+                      <small class="text-muted">{{ uploadingEditImage ? 'Uploading image...' : 'PNG/JPG/WebP up to 5MB' }}</small>
+                      @if (selectedProduct.image) {
+                        <img [src]="selectedProduct.image" alt="Edit preview" class="upload-preview mt-2" />
+                      }
+                    </div>
                     <textarea class="form-control full-width" rows="3" placeholder="Description" [(ngModel)]="selectedProduct.description"></textarea>
                   </div>
                   <div class="d-flex gap-2 mt-2">

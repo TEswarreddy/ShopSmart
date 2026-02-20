@@ -39,6 +39,8 @@ export class ShopDashboard {
   products: ShopProduct[] = [];
   selectedProduct: ShopProduct | null = null;
   savingProduct = false;
+  uploadingAddImage = false;
+  uploadingEditImage = false;
   deletingProductId = '';
 
   shopOrders: OrderResponse[] = [];
@@ -170,6 +172,58 @@ export class ShopDashboard {
       error: (err: { error?: { message?: string } }) => {
         this.error = err.error?.message || 'Unable to delete product.';
         this.deletingProductId = '';
+      }
+    });
+  }
+
+  onAddProductImageSelected(event: Event): void {
+    const target = event.target as HTMLInputElement | null;
+    const file = target?.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    this.uploadingAddImage = true;
+    this.error = '';
+
+    this.productService.uploadShopProductImage(file).subscribe({
+      next: ({ imageUrl }) => {
+        this.productForm.image = imageUrl;
+        this.uploadingAddImage = false;
+      },
+      error: (err: { error?: { message?: string } }) => {
+        this.error = err.error?.message || 'Unable to upload image.';
+        this.uploadingAddImage = false;
+      }
+    });
+  }
+
+  onEditProductImageSelected(event: Event): void {
+    if (!this.selectedProduct) {
+      return;
+    }
+
+    const target = event.target as HTMLInputElement | null;
+    const file = target?.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    this.uploadingEditImage = true;
+    this.error = '';
+
+    this.productService.uploadShopProductImage(file).subscribe({
+      next: ({ imageUrl }) => {
+        if (this.selectedProduct) {
+          this.selectedProduct.image = imageUrl;
+        }
+        this.uploadingEditImage = false;
+      },
+      error: (err: { error?: { message?: string } }) => {
+        this.error = err.error?.message || 'Unable to upload image.';
+        this.uploadingEditImage = false;
       }
     });
   }

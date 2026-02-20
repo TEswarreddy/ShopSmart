@@ -10,12 +10,15 @@ const {
   getMyShopProducts,
   addShopProduct,
   updateShopProduct,
-  deleteShopProduct
+  deleteShopProduct,
+  uploadShopProductImage
 } = require("../controllers/productController");
 const { protect, admin, shopApproved } = require("../middleware/authMiddleware");
+const { uploadProductImage } = require("../middleware/uploadMiddleware");
 
 router.get("/", getProducts);
 router.get("/shop/my", protect, shopApproved, getMyShopProducts);
+router.post("/shop/upload-image", protect, shopApproved, uploadProductImage.single("image"), uploadShopProductImage);
 router.post("/shop", protect, shopApproved, addShopProduct);
 router.put("/shop/:id", protect, shopApproved, updateShopProduct);
 router.delete("/shop/:id", protect, shopApproved, deleteShopProduct);
