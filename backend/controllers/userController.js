@@ -14,6 +14,7 @@ const buildAuthResponse = (user) => ({
   email: user.email,
   phone: user.phone,
   role: user.role,
+  shopApprovalStatus: user.shopApprovalStatus,
   shopDetails: user.shopDetails,
   token: generateToken(user._id),
 });
@@ -152,6 +153,13 @@ exports.loginUser = async (req, res) => {
       return res.status(403).json({ message: "Role does not match this account" });
     }
 
+    if (user.role === "shop" && user.shopApprovalStatus !== "approved") {
+      if (user.shopApprovalStatus === "rejected") {
+        return res.status(403).json({ message: "Your shop account was rejected by admin" });
+      }
+      return res.status(403).json({ message: "Your shop account is pending admin approval" });
+    }
+
     res.json(buildAuthResponse(user));
   } else {
     res.status(401).json({ message: "Invalid email or password" });
@@ -169,6 +177,7 @@ exports.getUserProfile = async (req, res) => {
     email: req.user.email,
     phone: req.user.phone,
     role: req.user.role,
+    shopApprovalStatus: req.user.shopApprovalStatus,
     profile: req.user.profile,
     shopDetails: req.user.shopDetails,
   });
@@ -236,6 +245,7 @@ exports.updateUserProfile = async (req, res) => {
     email: updatedUser.email,
     phone: updatedUser.phone,
     role: updatedUser.role,
+    shopApprovalStatus: updatedUser.shopApprovalStatus,
     profile: updatedUser.profile,
     shopDetails: updatedUser.shopDetails,
   });
@@ -270,4 +280,38 @@ exports.updateUserPassword = async (req, res) => {
   await user.save();
 
   res.json({ message: "Password updated successfully" });
+};
+
+exports.getPendingShops = async (req, res) => {
+  const shops = await User.find({ role: "shop", shopApprovalStatus: "pending" })
+    .select("name email phone shopDetails shopApprovalStatus createdAt")
+    .sort({ createdAt: -1 });
+
+  res.json(shops);
+};
+
+exports.updateShopApprovalStatus = async (req, res) => {
+  const { status } = req.body;
+
+  if (!["approved", "rejected"].includes(status)) {
+    return res.status(400).json({ message: "Status must be approved or rejected" });
+  }
+
+  const shop = await User.findById(req.params.id);
+
+  if (!shop || shop.role !== "shop") {
+    return res.status(404).json({ message: "Shop account not found" });
+  }
+
+  shop.shopApprovalStatus = status;
+  await shop.save();
+
+  res.json({
+    _id: shop._id,
+    name: shop.name,
+    email: shop.email,
+    phone: shop.phone,
+    shopApprovalStatus: shop.shopApprovalStatus,
+    shopDetails: shop.shopDetails,
+  });
 };

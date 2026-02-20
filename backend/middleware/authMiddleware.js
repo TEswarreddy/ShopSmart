@@ -26,3 +26,15 @@ exports.admin = (req, res, next) => {
     res.status(403).json({ message: "Admin only" });
   }
 };
+
+exports.shopApproved = (req, res, next) => {
+  if (!req.user || req.user.role !== "shop") {
+    return res.status(403).json({ message: "Shop only" });
+  }
+
+  if (req.user.shopApprovalStatus !== "approved") {
+    return res.status(403).json({ message: "Shop account is not approved" });
+  }
+
+  next();
+};

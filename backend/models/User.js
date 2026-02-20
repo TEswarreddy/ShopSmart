@@ -36,6 +36,13 @@ const userSchema = mongoose.Schema({
     type: String,
     enum: ["user", "shop", "admin"],
     default: "user"
+  },
+  shopApprovalStatus: {
+    type: String,
+    enum: ["pending", "approved", "rejected"],
+    default: function () {
+      return this.role === "shop" ? "pending" : "approved";
+    }
   }
 }, { timestamps: true });
 

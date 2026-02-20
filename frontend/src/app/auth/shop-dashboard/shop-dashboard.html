@@ -1,0 +1,161 @@
+<section class="shop-dashboard-shell">
+  <div class="shop-dashboard-card">
+    <h1 class="mb-1">Shop Dashboard</h1>
+    <p class="text-muted mb-3">
+      Add Product • Manage Products • View Orders • Update Order Status • View Sales Report
+    </p>
+
+    @if (!authService.isShopApproved()) {
+      <div class="alert alert-warning" role="alert">
+        Your shop account is pending admin approval. Dashboard operations are disabled until approval.
+      </div>
+    } @else {
+      @if (error) {
+        <div class="alert alert-danger" role="alert">{{ error }}</div>
+      }
+
+      @if (loading) {
+        <p class="mb-0">Loading shop dashboard...</p>
+      } @else {
+        <section class="dashboard-section">
+          <h2 class="h5">Add Product</h2>
+          <div class="grid two-col">
+            <input class="form-control" placeholder="Title" [(ngModel)]="productForm.title" />
+            <input class="form-control" type="number" min="0" placeholder="Price" [(ngModel)]="productForm.price" />
+            <input class="form-control" placeholder="Category" [(ngModel)]="productForm.category" />
+            <input class="form-control" type="number" min="0" placeholder="Stock" [(ngModel)]="productForm.stock" />
+            <input class="form-control full-width" placeholder="Image URL" [(ngModel)]="productForm.image" />
+            <textarea class="form-control full-width" rows="3" placeholder="Description" [(ngModel)]="productForm.description"></textarea>
+          </div>
+          <button class="btn btn-warning mt-2" type="button" [disabled]="savingProduct" (click)="addProduct()">
+            {{ savingProduct ? 'Saving...' : 'Add Product' }}
+          </button>
+        </section>
+
+        <section class="dashboard-section">
+          <h2 class="h5">Manage Products</h2>
+          @if (products.length === 0) {
+            <p class="text-muted mb-0">No products yet.</p>
+          } @else {
+            <div class="table-responsive">
+              <table class="table table-sm align-middle">
+                <thead>
+                  <tr>
+                    <th>Title</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (product of products; track product._id) {
+                    <tr>
+                      <td>{{ product.title }}</td>
+                      <td>{{ product.price | currency: 'INR' : 'symbol' : '1.0-0' }}</td>
+                      <td>{{ product.stock || 0 }}</td>
+                      <td class="d-flex gap-2">
+                        <button class="btn btn-sm btn-outline-dark" type="button" (click)="editProduct(product)">Edit</button>
+                        <button class="btn btn-sm btn-outline-danger" type="button" [disabled]="deletingProductId === product._id" (click)="deleteProduct(product._id)">
+                          {{ deletingProductId === product._id ? 'Deleting...' : 'Delete' }}
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+
+          @if (selectedProduct) {
+            <div class="edit-card mt-2">
+              <h3 class="h6">Edit Product</h3>
+              <div class="grid two-col">
+                <input class="form-control" placeholder="Title" [(ngModel)]="selectedProduct.title" />
+                <input class="form-control" type="number" min="0" placeholder="Price" [(ngModel)]="selectedProduct.price" />
+                <input class="form-control" placeholder="Category" [(ngModel)]="selectedProduct.category" />
+                <input class="form-control" type="number" min="0" placeholder="Stock" [(ngModel)]="selectedProduct.stock" />
+                <input class="form-control full-width" placeholder="Image URL" [(ngModel)]="selectedProduct.image" />
+                <textarea class="form-control full-width" rows="3" placeholder="Description" [(ngModel)]="selectedProduct.description"></textarea>
+              </div>
+              <div class="d-flex gap-2 mt-2">
+                <button class="btn btn-warning" type="button" [disabled]="savingProduct" (click)="updateProduct()">Update Product</button>
+                <button class="btn btn-outline-dark" type="button" [disabled]="savingProduct" (click)="selectedProduct = null">Cancel</button>
+              </div>
+            </div>
+          }
+        </section>
+
+        <section class="dashboard-section">
+          <h2 class="h5">View Orders & Update Order Status</h2>
+          @if (shopOrders.length === 0) {
+            <p class="text-muted mb-0">No orders for your shop yet.</p>
+          } @else {
+            <div class="order-list">
+              @for (order of shopOrders; track order._id) {
+                <article class="order-card">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <strong>Order #{{ order._id.slice(-6) }}</strong>
+                    <small class="text-muted">{{ order.createdAt | date: 'mediumDate' }}</small>
+                  </div>
+                  <div class="small mb-2">Total: {{ order.totalPrice | currency: 'INR' : 'symbol' : '1.0-0' }}</div>
+
+                  <div class="d-flex gap-2 flex-wrap">
+                    <select #statusSelect class="form-select form-select-sm status-select">
+                      @for (status of orderStatusOptions; track status) {
+                        <option [selected]="status === order.orderStatus" [value]="status">{{ status }}</option>
+                      }
+                    </select>
+
+                    <select #paymentSelect class="form-select form-select-sm status-select">
+                      @for (paymentStatus of paymentStatusOptions; track paymentStatus) {
+                        <option [selected]="paymentStatus === order.paymentStatus" [value]="paymentStatus">{{ paymentStatus }}</option>
+                      }
+                    </select>
+
+                    <button class="btn btn-sm btn-outline-dark" type="button" (click)="updateOrderStatus(order, statusSelect.value, paymentSelect.value)">
+                      Update
+                    </button>
+                  </div>
+                </article>
+              }
+            </div>
+          }
+        </section>
+
+        <section class="dashboard-section">
+          <h2 class="h5">Sales Report</h2>
+          @if (salesReport) {
+            <div class="grid three-col mb-3">
+              <div class="metric-card">
+                <span>Total Sales</span>
+                <strong>{{ salesReport.totalSales | currency: 'INR' : 'symbol' : '1.0-0' }}</strong>
+              </div>
+              <div class="metric-card">
+                <span>Total Orders</span>
+                <strong>{{ salesReport.totalOrders }}</strong>
+              </div>
+              <div class="metric-card">
+                <span>Items Sold</span>
+                <strong>{{ salesReport.totalItemsSold }}</strong>
+              </div>
+            </div>
+
+            <h3 class="h6">Recent Orders</h3>
+            @if (salesReport.recentOrders.length === 0) {
+              <p class="text-muted mb-0">No recent orders.</p>
+            } @else {
+              <ul class="list-group list-group-flush">
+                @for (order of salesReport.recentOrders; track order._id) {
+                  <li class="list-group-item px-0 d-flex justify-content-between">
+                    <span>#{{ order._id.slice(-6) }} • {{ order.orderStatus }}</span>
+                    <strong>{{ order.totalPrice | currency: 'INR' : 'symbol' : '1.0-0' }}</strong>
+                  </li>
+                }
+              </ul>
+            }
+          }
+        </section>
+      }
+    }
+  </div>
+</section>

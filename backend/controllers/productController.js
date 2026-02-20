@@ -111,3 +111,53 @@ exports.addProductReview = async (req, res) => {
   await product.save();
   res.status(201).json({ message: "Review added" });
 };
+
+exports.getMyShopProducts = async (req, res) => {
+  const products = await Product.find({ shop: req.user._id }).sort({ createdAt: -1 });
+  res.json(products);
+};
+
+exports.addShopProduct = async (req, res) => {
+  const { title, description, price, image, category, stock } = req.body;
+
+  if (!title || !description || price === undefined) {
+    return res.status(400).json({ message: "Title, description, and price are required" });
+  }
+
+  const product = await Product.create({
+    title,
+    description,
+    price,
+    image,
+    category,
+    stock,
+    shop: req.user._id,
+  });
+
+  res.status(201).json(product);
+};
+
+exports.updateShopProduct = async (req, res) => {
+  const product = await Product.findOne({ _id: req.params.id, shop: req.user._id });
+
+  if (!product) {
+    return res.status(404).json({ message: "Product not found" });
+  }
+
+  Object.assign(product, req.body);
+  product.shop = req.user._id;
+
+  const updated = await product.save();
+  res.json(updated);
+};
+
+exports.deleteShopProduct = async (req, res) => {
+  const product = await Product.findOne({ _id: req.params.id, shop: req.user._id });
+
+  if (!product) {
+    return res.status(404).json({ message: "Product not found" });
+  }
+
+  await product.deleteOne();
+  res.json({ message: "Product removed" });
+};

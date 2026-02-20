@@ -27,6 +27,10 @@ const reviewSchema = mongoose.Schema(
 
 const productSchema = mongoose.Schema(
   {
+    shop: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User"
+    },
     title: { type: String, required: true },
     description: { type: String, required: true },
     price: { type: Number, required: true },

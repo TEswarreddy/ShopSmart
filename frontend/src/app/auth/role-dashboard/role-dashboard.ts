@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { AuthService } from '../../services/auth';
+import { AuthService, PendingShop } from '../../services/auth';
 
 @Component({
   selector: 'app-role-dashboard',
@@ -11,7 +11,17 @@ import { AuthService } from '../../services/auth';
   styleUrl: './role-dashboard.css'
 })
 export class RoleDashboard {
+  pendingShops: PendingShop[] = [];
+  approvalLoading = false;
+  approvalError = '';
+
   constructor(public authService: AuthService) {}
+
+  ngOnInit(): void {
+    if (this.authService.role() === 'admin') {
+      this.loadPendingShops();
+    }
+  }
 
   readonly heading = computed(() => {
     const role = this.authService.role();
@@ -58,4 +68,33 @@ export class RoleDashboard {
     }
     return 'Browse Products';
   });
+
+  loadPendingShops(): void {
+    this.approvalLoading = true;
+    this.approvalError = '';
+
+    this.authService.getPendingShops().subscribe({
+      next: (shops) => {
+        this.pendingShops = shops;
+        this.approvalLoading = false;
+      },
+      error: (err: { error?: { message?: string } }) => {
+        this.approvalError = err.error?.message || 'Unable to load pending shops.';
+        this.approvalLoading = false;
+      }
+    });
+  }
+
+  updateApproval(shopId: string, status: 'approved' | 'rejected'): void {
+    this.approvalError = '';
+
+    this.authService.updateShopApprovalStatus(shopId, status).subscribe({
+      next: () => {
+        this.pendingShops = this.pendingShops.filter((shop) => shop._id !== shopId);
+      },
+      error: (err: { error?: { message?: string } }) => {
+        this.approvalError = err.error?.message || 'Unable to update shop approval.';
+      }
+    });
+  }
 }

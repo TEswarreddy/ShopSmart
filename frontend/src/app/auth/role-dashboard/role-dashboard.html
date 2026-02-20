@@ -21,5 +21,49 @@
         <a class="btn btn-outline-dark" routerLink="/cart">Open Cart</a>
       }
     </div>
+
+    @if (authService.role() === 'admin') {
+      <section class="mt-4">
+        <h2 class="h5">Shop Approval Requests</h2>
+
+        @if (approvalError) {
+          <div class="alert alert-danger" role="alert">{{ approvalError }}</div>
+        }
+
+        @if (approvalLoading) {
+          <p class="mb-0">Loading pending shops...</p>
+        } @else {
+          @if (pendingShops.length === 0) {
+            <p class="text-muted mb-0">No pending shop approvals.</p>
+          } @else {
+            <div class="table-responsive">
+              <table class="table table-sm align-middle">
+                <thead>
+                  <tr>
+                    <th>Shop</th>
+                    <th>Email</th>
+                    <th>Owner</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (shop of pendingShops; track shop._id) {
+                    <tr>
+                      <td>{{ shop.shopDetails?.shopName || shop.name }}</td>
+                      <td>{{ shop.email }}</td>
+                      <td>{{ shop.shopDetails?.ownerName || '-' }}</td>
+                      <td class="d-flex gap-2">
+                        <button class="btn btn-sm btn-success" type="button" (click)="updateApproval(shop._id, 'approved')">Approve</button>
+                        <button class="btn btn-sm btn-outline-danger" type="button" (click)="updateApproval(shop._id, 'rejected')">Reject</button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        }
+      </section>
+    }
   </div>
 </section>

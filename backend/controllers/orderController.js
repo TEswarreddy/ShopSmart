@@ -123,3 +123,82 @@ exports.cancelMyOrder = async (req, res) => {
   const refreshedOrder = await Order.findById(order._id).populate("items.product");
   res.json(refreshedOrder);
 };
+
+exports.getShopOrders = async (req, res) => {
+  const products = await Product.find({ shop: req.user._id }).select("_id");
+  const productIds = products.map((product) => product._id);
+
+  const orders = await Order.find({ "items.product": { $in: productIds } })
+    .populate("user", "name email")
+    .populate("items.product")
+    .sort({ createdAt: -1 });
+
+  res.json(orders);
+};
+
+exports.updateShopOrderStatus = async (req, res) => {
+  const products = await Product.find({ shop: req.user._id }).select("_id");
+  const productIds = products.map((product) => product._id.toString());
+
+  const order = await Order.findById(req.params.id).populate("items.product");
+
+  if (!order) {
+    return res.status(404).json({ message: "Order not found" });
+  }
+
+  const hasShopItem = order.items.some(
+    (item) => item.product && productIds.includes(item.product._id.toString())
+  );
+
+  if (!hasShopItem) {
+    return res.status(403).json({ message: "Not authorized for this order" });
+  }
+
+  order.orderStatus = req.body.status || order.orderStatus;
+  order.paymentStatus = req.body.paymentStatus || order.paymentStatus;
+  await order.save();
+
+  const updated = await Order.findById(order._id)
+    .populate("user", "name email")
+    .populate("items.product");
+
+  res.json(updated);
+};
+
+exports.getShopSalesReport = async (req, res) => {
+  const products = await Product.find({ shop: req.user._id }).select("_id");
+  const productIds = products.map((product) => product._id.toString());
+
+  const orders = await Order.find({ "items.product": { $in: products.map((product) => product._id) } })
+    .populate("items.product")
+    .sort({ createdAt: -1 });
+
+  let totalSales = 0;
+  let totalOrders = 0;
+  let totalItemsSold = 0;
+
+  for (const order of orders) {
+    let shopOrderAmount = 0;
+    let hasShopItem = false;
+
+    for (const item of order.items) {
+      if (item.product && productIds.includes(item.product._id.toString())) {
+        hasShopItem = true;
+        shopOrderAmount += item.product.price * item.quantity;
+        totalItemsSold += item.quantity;
+      }
+    }
+
+    if (hasShopItem) {
+      totalOrders += 1;
+      totalSales += shopOrderAmount;
+    }
+  }
+
+  res.json({
+    totalSales,
+    totalOrders,
+    totalItemsSold,
+    recentOrders: orders.slice(0, 10),
+  });
+};

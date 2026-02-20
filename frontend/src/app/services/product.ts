@@ -56,5 +56,21 @@ export class Product {
   addReview(id: string, payload: { rating: number; comment: string }): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(`${environment.apiUrl}/products/${id}/reviews`, payload);
   }
+
+  getMyShopProducts(): Observable<ShopProduct[]> {
+    return this.http.get<ShopProduct[]>(`${environment.apiUrl}/products/shop/my`);
+  }
+
+  addShopProduct(payload: Partial<ShopProduct>): Observable<ShopProduct> {
+    return this.http.post<ShopProduct>(`${environment.apiUrl}/products/shop`, payload);
+  }
+
+  updateShopProduct(productId: string, payload: Partial<ShopProduct>): Observable<ShopProduct> {
+    return this.http.put<ShopProduct>(`${environment.apiUrl}/products/shop/${productId}`, payload);
+  }
+
+  deleteShopProduct(productId: string): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${environment.apiUrl}/products/shop/${productId}`);
+  }
 }
 

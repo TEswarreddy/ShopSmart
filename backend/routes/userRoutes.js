@@ -6,8 +6,10 @@ const {
 	getUserProfile,
 	updateUserProfile,
 	updateUserPassword,
+	getPendingShops,
+	updateShopApprovalStatus,
 } = require("../controllers/userController");
-const { protect } = require("../middleware/authMiddleware");
+const { protect, admin } = require("../middleware/authMiddleware");
 
 router.post("/register", registerUser);
 router.post("/login", loginUser);
@@ -16,5 +18,7 @@ router.post("/login", loginUser);
 router.get("/profile", protect, getUserProfile);
 router.put("/profile", protect, updateUserProfile);
 router.put("/profile/password", protect, updateUserPassword);
+router.get("/shops/pending", protect, admin, getPendingShops);
+router.put("/shops/:id/approval", protect, admin, updateShopApprovalStatus);
 
 module.exports = router;

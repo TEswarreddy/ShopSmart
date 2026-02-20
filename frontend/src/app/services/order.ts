@@ -66,6 +66,13 @@ export interface UpdateOrderStatusPayload {
   paymentStatus?: string;
 }
 
+export interface ShopSalesReportResponse {
+  totalSales: number;
+  totalOrders: number;
+  totalItemsSold: number;
+  recentOrders: OrderResponse[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -100,5 +107,17 @@ export class OrderService {
 
   verifyPayment(payload: VerifyPaymentPayload): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(`${environment.apiUrl}/payment/verify`, payload);
+  }
+
+  getShopOrders(): Observable<OrderResponse[]> {
+    return this.http.get<OrderResponse[]>(`${environment.apiUrl}/orders/shop`);
+  }
+
+  updateShopOrderStatus(orderId: string, payload: UpdateOrderStatusPayload): Observable<OrderResponse> {
+    return this.http.put<OrderResponse>(`${environment.apiUrl}/orders/shop/${orderId}/status`, payload);
+  }
+
+  getShopSalesReport(): Observable<ShopSalesReportResponse> {
+    return this.http.get<ShopSalesReportResponse>(`${environment.apiUrl}/orders/shop/sales-report`);
   }
 }

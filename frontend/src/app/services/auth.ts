@@ -15,6 +15,7 @@ export interface AuthUser {
   email: string;
   phone?: string;
   role: UserRole;
+  shopApprovalStatus?: 'pending' | 'approved' | 'rejected';
   profile?: {
     gender?: string;
     dateOfBirth?: string;
@@ -92,6 +93,16 @@ export interface UpdatePasswordPayload {
   newPassword: string;
 }
 
+export interface PendingShop {
+  _id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  shopApprovalStatus: 'pending' | 'approved' | 'rejected';
+  createdAt: string;
+  shopDetails?: AuthUser['shopDetails'];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -130,6 +141,14 @@ export class AuthService {
     return this.http.put<{ message: string }>(`${environment.apiUrl}/users/profile/password`, payload);
   }
 
+  getPendingShops(): Observable<PendingShop[]> {
+    return this.http.get<PendingShop[]>(`${environment.apiUrl}/users/shops/pending`);
+  }
+
+  updateShopApprovalStatus(shopId: string, status: 'approved' | 'rejected'): Observable<PendingShop> {
+    return this.http.put<PendingShop>(`${environment.apiUrl}/users/shops/${shopId}/approval`, { status });
+  }
+
   logout(): void {
     this.userSignal.set(null);
     localStorage.removeItem(AUTH_KEY);
@@ -141,6 +160,14 @@ export class AuthService {
 
   isRole(role: UserRole): boolean {
     return this.userSignal()?.role === role;
+  }
+
+  isShopApproved(): boolean {
+    const user = this.userSignal();
+    if (!user || user.role !== 'shop') {
+      return true;
+    }
+    return user.shopApprovalStatus === 'approved';
   }
 
   getDefaultRouteByRole(role?: UserRole | null): string {
