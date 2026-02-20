@@ -1,0 +1,59 @@
+.checkout-card {
+  background: #fff;
+  border: 1px solid #d5d9d9;
+  border-radius: 10px;
+  padding: 1rem;
+}
+
+.payment-options {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.payment-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid #d5d9d9;
+  border-radius: 8px;
+  padding: 0.6rem 0.7rem;
+}
+
+.summary-items {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.summary-title {
+  margin: 0;
+  font-weight: 600;
+}
+
+.summary-meta {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.88rem;
+}
+
+.summary-price {
+  margin: 0;
+  font-weight: 600;
+}
+
+.summary-row,
+.summary-total {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.35rem;
+}
+
+.summary-total {
+  font-size: 1.1rem;
+  margin-top: 0.35rem;
+}

@@ -1,24 +1,61 @@
 const Order = require("../models/Order");
 const Cart = require("../models/Cart");
+const Product = require("../models/Product");
 
 // 🧾 Place Order
 exports.placeOrder = async (req, res) => {
-  const { shippingAddress, paymentMethod } = req.body;
+  const { shippingAddress, paymentMethod, items: requestItems } = req.body;
 
-  const cart = await Cart.findOne({ user: req.user._id }).populate("items.product");
+  if (!shippingAddress || !shippingAddress.address || !shippingAddress.city || !shippingAddress.postalCode || !shippingAddress.country) {
+    return res.status(400).json({ message: "Shipping address is incomplete" });
+  }
 
-  if (!cart || cart.items.length === 0) {
-    return res.status(400).json({ message: "Cart is empty" });
+  let orderItems = [];
+
+  if (Array.isArray(requestItems) && requestItems.length > 0) {
+    const productIds = requestItems.map(item => item.product);
+    const products = await Product.find({ _id: { $in: productIds } });
+
+    const productMap = new Map(products.map(product => [product._id.toString(), product]));
+
+    for (const item of requestItems) {
+      const product = productMap.get(item.product);
+      const quantity = Number(item.quantity || 0);
+
+      if (!product) {
+        return res.status(400).json({ message: "One or more products are invalid" });
+      }
+
+      if (quantity <= 0) {
+        return res.status(400).json({ message: "Quantity must be at least 1" });
+      }
+
+      orderItems.push({
+        product,
+        quantity
+      });
+    }
+  } else {
+    const cart = await Cart.findOne({ user: req.user._id }).populate("items.product");
+
+    if (!cart || cart.items.length === 0) {
+      return res.status(400).json({ message: "Cart is empty" });
+    }
+
+    orderItems = cart.items;
+
+    cart.items = [];
+    await cart.save();
   }
 
   // Calculate total
-  const totalPrice = cart.items.reduce((acc, item) => {
+  const totalPrice = orderItems.reduce((acc, item) => {
     return acc + item.product.price * item.quantity;
   }, 0);
 
   const order = await Order.create({
     user: req.user._id,
-    items: cart.items.map(item => ({
+    items: orderItems.map(item => ({
       product: item.product._id,
       quantity: item.quantity
     })),
@@ -26,10 +63,6 @@ exports.placeOrder = async (req, res) => {
     shippingAddress,
     paymentMethod
   });
-
-  // Clear Cart
-  cart.items = [];
-  await cart.save();
 
   res.status(201).json(order);
 };

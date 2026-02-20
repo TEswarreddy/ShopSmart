@@ -1,0 +1,153 @@
+<h2 class="h4 mb-3">Checkout</h2>
+
+@if (cartService.items().length === 0) {
+  <div class="alert alert-warning" role="alert">
+    Your cart is empty. <a routerLink="/" class="alert-link">Continue shopping</a>
+  </div>
+}
+
+@if (cartService.items().length > 0) {
+  <div class="row g-4">
+    <div class="col-12 col-lg-7">
+      <div class="checkout-card">
+        <h3 class="h5 mb-3">Shipping Details</h3>
+
+        @if (error) {
+          <div class="alert alert-danger" role="alert">{{ error }}</div>
+        }
+
+        @if (successMessage) {
+          <div class="alert alert-success" role="alert">{{ successMessage }}</div>
+        }
+
+        <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+          <div class="mb-3">
+            <label class="form-label" for="fullName">Full name</label>
+            <input id="fullName" type="text" class="form-control" formControlName="fullName" />
+            @if (fieldError('fullName')) {
+              <small class="text-danger">{{ fieldError('fullName') }}</small>
+            }
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="phone">Phone number</label>
+            <input id="phone" type="text" class="form-control" formControlName="phone" />
+            @if (fieldError('phone')) {
+              <small class="text-danger">{{ fieldError('phone') }}</small>
+            }
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="address">Address</label>
+            <textarea id="address" rows="3" class="form-control" formControlName="address"></textarea>
+            @if (fieldError('address')) {
+              <small class="text-danger">{{ fieldError('address') }}</small>
+            }
+          </div>
+
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
+              <label class="form-label" for="city">City</label>
+              <input id="city" type="text" class="form-control" formControlName="city" />
+              @if (fieldError('city')) {
+                <small class="text-danger">{{ fieldError('city') }}</small>
+              }
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="form-label" for="postalCode">Postal code</label>
+              <input id="postalCode" type="text" class="form-control" formControlName="postalCode" />
+              @if (fieldError('postalCode')) {
+                <small class="text-danger">{{ fieldError('postalCode') }}</small>
+              }
+            </div>
+          </div>
+
+          <div class="mt-3 mb-3">
+            <label class="form-label" for="country">Country</label>
+            <input id="country" type="text" class="form-control" formControlName="country" />
+            @if (fieldError('country')) {
+              <small class="text-danger">{{ fieldError('country') }}</small>
+            }
+          </div>
+
+          <h3 class="h6 mb-2">Payment Method</h3>
+          <div class="payment-options mb-3">
+            <label class="payment-option">
+              <input type="radio" formControlName="paymentMethod" value="COD" />
+              <span>Cash on Delivery</span>
+            </label>
+
+            <label class="payment-option">
+              <input type="radio" formControlName="paymentMethod" value="ONLINE" />
+              <span>Online Payment (Razorpay)</span>
+            </label>
+          </div>
+
+          <label class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" formControlName="saveAddress" />
+            <span class="form-check-label">Save this address for future orders</span>
+          </label>
+
+          <div class="d-flex gap-2">
+            <button class="btn btn-warning" type="submit" [disabled]="loading">
+              {{ loading ? 'Processing...' : 'Place Order' }}
+            </button>
+            <button class="btn btn-outline-secondary" type="button" (click)="goToProducts()">
+              Continue Shopping
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-5">
+      <div class="checkout-card">
+        <h3 class="h5 mb-3">Order Summary</h3>
+
+        <div class="summary-items">
+          @for (item of cartService.items(); track item.product._id) {
+            <div class="summary-item">
+              <div>
+                <p class="summary-title">{{ item.product.title }}</p>
+                <p class="summary-meta">Qty: {{ item.quantity }}</p>
+              </div>
+              <p class="summary-price">₹{{ item.product.price * item.quantity }}</p>
+            </div>
+          }
+        </div>
+
+        <hr />
+
+        <div class="summary-row">
+          <span>Subtotal</span>
+          <strong>₹{{ subtotal() }}</strong>
+        </div>
+        <div class="summary-row">
+          <span>Shipping</span>
+          <strong>₹{{ shippingCharge() }}</strong>
+        </div>
+        <div class="summary-row">
+          <span>Tax (18%)</span>
+          <strong>₹{{ tax() }}</strong>
+        </div>
+
+        <div class="summary-total">
+          <span>Total</span>
+          <strong>₹{{ grandTotal() }}</strong>
+        </div>
+
+        @if (placedOrderId) {
+          <div class="mt-3 small text-muted">
+            Order ID: <strong>{{ placedOrderId }}</strong>
+          </div>
+        }
+
+        @if (paymentOrderId) {
+          <div class="mt-1 small text-muted">
+            Razorpay Order ID: <strong>{{ paymentOrderId }}</strong>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+}

@@ -42,6 +42,10 @@
 				<a class="utility-link cart-link" routerLink="/cart" routerLinkActive="active" (click)="closeMenu()">
 					Cart <span class="cart-badge">{{ cartService.totalItems() }}</span>
 				</a>
+				<a class="utility-link" routerLink="/checkout" (click)="closeMenu()">
+					<span class="small-label">Secure</span>
+					<strong>Checkout</strong>
+				</a>
 				@if (authService.isLoggedIn()) {
 					<button class="utility-action" type="button" (click)="logout()">Logout</button>
 				} @else {
@@ -54,6 +58,7 @@
 			<div class="container sub-inner" [class.open]="isMenuOpen">
 				<a class="sub-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMenu()">All Products</a>
 				<a class="sub-link" routerLink="/cart" routerLinkActive="active" (click)="closeMenu()">Your Cart</a>
+				<a class="sub-link" routerLink="/checkout" routerLinkActive="active" (click)="closeMenu()">Checkout</a>
 				@if (!authService.isLoggedIn()) {
 					<a class="sub-link" routerLink="/login" routerLinkActive="active" (click)="closeMenu()">Sign In</a>
 					<a class="sub-link" routerLink="/register" routerLinkActive="active" (click)="closeMenu()">Register</a>
