@@ -1,0 +1,32 @@
+.auth-shell {
+  min-height: calc(100vh - 260px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-card {
+  width: min(100%, 460px);
+  background: #fff;
+  border: 1px solid #d5d9d9;
+  border-radius: 10px;
+  padding: 1.25rem;
+}
+
+.auth-title {
+  font-size: 1.6rem;
+  margin-bottom: 1rem;
+}
+
+.auth-switch {
+  font-size: 0.92rem;
+}
+
+.auth-switch a {
+  color: #007185;
+  text-decoration: none;
+}
+
+.auth-switch a:hover {
+  text-decoration: underline;
+}

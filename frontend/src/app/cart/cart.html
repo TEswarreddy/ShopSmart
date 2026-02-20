@@ -1,0 +1,48 @@
+<h2 class="h4 mb-3">Your Cart</h2>
+
+@if (cartService.items().length === 0) {
+  <div class="alert alert-info" role="alert">
+    Your cart is empty. <a routerLink="/" class="alert-link">Continue shopping</a>
+  </div>
+}
+
+@if (cartService.items().length > 0) {
+  <div class="list-group mb-3">
+    @for (item of cartService.items(); track item.product._id) {
+      <div class="list-group-item">
+        <div class="d-flex justify-content-between align-items-start gap-3">
+          <div>
+            <h3 class="h6 mb-1">{{ item.product.title }}</h3>
+            <p class="mb-1 text-muted">₹{{ item.product.price }} each</p>
+            <p class="mb-0 fw-semibold">₹{{ item.product.price * item.quantity }}</p>
+          </div>
+
+          <div class="d-flex align-items-center gap-2">
+            <button class="btn btn-outline-secondary btn-sm" (click)="decrease(item.product._id, item.quantity)">
+              -
+            </button>
+            <span class="qty">{{ item.quantity }}</span>
+            <button class="btn btn-outline-secondary btn-sm" (click)="increase(item.product._id, item.quantity)">
+              +
+            </button>
+            <button class="btn btn-outline-danger btn-sm" (click)="remove(item.product._id)">
+              Remove
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <div class="d-flex justify-content-between align-items-center">
+    <div>
+      <p class="mb-0">Items: <strong>{{ cartService.totalItems() }}</strong></p>
+      <p class="mb-0">Subtotal: <strong>₹{{ cartService.subtotal() }}</strong></p>
+    </div>
+
+    <div class="d-flex gap-2">
+      <button class="btn btn-outline-danger" (click)="clear()">Clear cart</button>
+      <button class="btn btn-dark" type="button">Checkout</button>
+    </div>
+  </div>
+}

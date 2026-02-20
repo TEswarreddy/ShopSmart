@@ -1,6 +1,17 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { environment } from './environment'; 
+
+export interface ShopProduct {
+  _id: string;
+  title: string;
+  description: string;
+  price: number;
+  image?: string;
+  category?: string;
+  stock?: number;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -8,16 +19,13 @@ import { environment } from './environment';
 export class Product {
 
   constructor(private http: HttpClient) {}
-  //private apiUrl: string = 'https://fakestoreapi.com/products';
-  
-    getProducts() {
-    return this.http.get(environment.apiUrl + '/products'); 
+
+  getProducts(): Observable<ShopProduct[]> {
+    return this.http.get<ShopProduct[]>(environment.apiUrl + '/products');
   }
-// getProducts() {
-//     return this.http.get(this.apiUrl);
-//   }
-  getProductById(id: string) {
-    return this.http.get(`${environment.apiUrl}/products/${id}`);
+
+  getProductById(id: string): Observable<ShopProduct> {
+    return this.http.get<ShopProduct>(`${environment.apiUrl}/products/${id}`);
   }
 }
 

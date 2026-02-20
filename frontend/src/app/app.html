@@ -1,2 +1,102 @@
-<h3>Angular working</h3>
-<app-products></app-products>
+<div class="app-shell" id="top">
+	<header class="amazon-header">
+		<div class="header-main container-fluid">
+			<a class="logo" routerLink="/" (click)="closeMenu()">ShopSmart</a>
+
+			<div class="delivery-info d-none d-md-flex">
+				<span class="small-label">Deliver to</span>
+				<strong>India</strong>
+			</div>
+
+			<div class="search-wrap" role="search" aria-label="Search products">
+				<input class="search-input" type="text" placeholder="Search ShopSmart" />
+				<button class="search-btn" type="button">Search</button>
+			</div>
+
+			<button
+				class="menu-btn"
+				type="button"
+				[attr.aria-expanded]="isMenuOpen"
+				aria-label="Toggle navigation"
+				(click)="toggleMenu()"
+			>
+				☰
+			</button>
+
+			<nav class="utility-nav d-none d-lg-flex">
+				@if (authService.user(); as user) {
+					<a class="utility-link" routerLink="/" (click)="closeMenu()">
+						<span class="small-label">Hello, {{ user.name }}</span>
+						<strong>Account</strong>
+					</a>
+				} @else {
+					<a class="utility-link" routerLink="/login" (click)="closeMenu()">
+						<span class="small-label">Hello, sign in</span>
+						<strong>Account</strong>
+					</a>
+				}
+				<a class="utility-link" routerLink="/" (click)="closeMenu()">
+					<span class="small-label">Returns</span>
+					<strong>& Orders</strong>
+				</a>
+				<a class="utility-link cart-link" routerLink="/cart" routerLinkActive="active" (click)="closeMenu()">
+					Cart <span class="cart-badge">{{ cartService.totalItems() }}</span>
+				</a>
+				@if (authService.isLoggedIn()) {
+					<button class="utility-action" type="button" (click)="logout()">Logout</button>
+				} @else {
+					<a class="utility-action" routerLink="/register" (click)="closeMenu()">Register</a>
+				}
+			</nav>
+		</div>
+
+		<div class="header-sub">
+			<div class="container sub-inner" [class.open]="isMenuOpen">
+				<a class="sub-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMenu()">All Products</a>
+				<a class="sub-link" routerLink="/cart" routerLinkActive="active" (click)="closeMenu()">Your Cart</a>
+				@if (!authService.isLoggedIn()) {
+					<a class="sub-link" routerLink="/login" routerLinkActive="active" (click)="closeMenu()">Sign In</a>
+					<a class="sub-link" routerLink="/register" routerLinkActive="active" (click)="closeMenu()">Register</a>
+				}
+				<a class="sub-link" routerLink="/" (click)="closeMenu()">Today's Deals</a>
+				<a class="sub-link" routerLink="/" (click)="closeMenu()">Customer Service</a>
+				@if (authService.isLoggedIn()) {
+					<button class="sub-link sub-btn" type="button" (click)="logout()">Logout</button>
+				}
+			</div>
+		</div>
+	</header>
+
+	<main class="container py-4 flex-grow-1">
+		<router-outlet></router-outlet>
+	</main>
+
+	<footer class="amazon-footer mt-4">
+		<a href="#top" class="back-top">Back to top</a>
+
+		<div class="footer-columns container">
+			<div>
+				<h2>Get to Know Us</h2>
+				<a routerLink="/">About ShopSmart</a>
+				<a routerLink="/">Careers</a>
+				<a routerLink="/">Press Releases</a>
+			</div>
+			<div>
+				<h2>Make Money with Us</h2>
+				<a routerLink="/">Sell on ShopSmart</a>
+				<a routerLink="/">Advertise Products</a>
+				<a routerLink="/">Affiliate Program</a>
+			</div>
+			<div>
+				<h2>Help</h2>
+				<a routerLink="/">Payments</a>
+				<a routerLink="/">Shipping</a>
+				<a routerLink="/">Returns</a>
+			</div>
+		</div>
+
+		<div class="footer-bottom">
+			<span>© {{ currentYear }} ShopSmart</span>
+		</div>
+	</footer>
+</div>

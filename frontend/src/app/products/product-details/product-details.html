@@ -1,1 +1,30 @@
-<p>product-details works!</p>
+@if (loading) {
+	<p>Loading product...</p>
+}
+
+@if (!loading && error) {
+	<div class="alert alert-danger" role="alert">{{ error }}</div>
+	<a routerLink="/" class="btn btn-outline-dark btn-sm">Back to products</a>
+}
+
+@if (!loading && product) {
+	<div class="row g-4 align-items-start">
+		<div class="col-12 col-md-5">
+			@if (product.image) {
+				<img [src]="product.image" class="img-fluid detail-image" [alt]="product.title" />
+			}
+		</div>
+
+		<div class="col-12 col-md-7">
+			<p class="text-muted mb-1">{{ product.category || 'General' }}</p>
+			<h1 class="h3">{{ product.title }}</h1>
+			<p>{{ product.description }}</p>
+			<p class="h5 mb-3">₹{{ product.price }}</p>
+
+			<div class="d-flex gap-2">
+				<button type="button" class="btn btn-dark" (click)="addToCart()">Add to cart</button>
+				<a routerLink="/" class="btn btn-outline-secondary">Back</a>
+			</div>
+		</div>
+	</div>
+}
