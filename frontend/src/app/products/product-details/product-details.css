@@ -25,6 +25,10 @@
 	padding-top: 1rem;
 }
 
+.review-form {
+	border: 1px solid #e5e7eb;
+}
+
 .review-list {
 	display: grid;
 	gap: 0.7rem;

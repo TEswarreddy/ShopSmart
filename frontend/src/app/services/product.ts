@@ -52,5 +52,9 @@ export class Product {
   getProductById(id: string): Observable<ShopProduct> {
     return this.http.get<ShopProduct>(`${environment.apiUrl}/products/${id}`);
   }
+
+  addReview(id: string, payload: { rating: number; comment: string }): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${environment.apiUrl}/products/${id}/reviews`, payload);
+  }
 }
 
