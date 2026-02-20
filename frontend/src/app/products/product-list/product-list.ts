@@ -60,14 +60,18 @@ export class ProductList {
     this.filteredProducts = this.products.filter((item) => {
       const matchesSearch =
         !query ||
-        item.title.toLowerCase().includes(query) ||
-        item.description.toLowerCase().includes(query) ||
+        item.title?.toLowerCase().includes(query) ||
+        item.description?.toLowerCase().includes(query) ||
         item.category?.toLowerCase().includes(query);
 
       const matchesCategory = !this.selectedCategory || item.category === this.selectedCategory;
 
       return !!matchesSearch && matchesCategory;
     });
+  }
+
+  productId(item: ShopProduct): string {
+    return item._id || item.id || '';
   }
 }
 

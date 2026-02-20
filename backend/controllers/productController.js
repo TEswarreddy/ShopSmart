@@ -1,4 +1,5 @@
 const Product = require("../models/Product");
+const mongoose = require("mongoose");
 
 // ➕ Add Product (Admin)
 exports.addProduct = async (req, res) => {
@@ -30,6 +31,10 @@ exports.getProducts = async (req, res) => {
 
 // 🔍 Get Single Product
 exports.getProductById = async (req, res) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return res.status(404).json({ message: "Product not found" });
+  }
+
   const product = await Product.findById(req.params.id);
 
   if (product) {

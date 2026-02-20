@@ -31,7 +31,7 @@
 
 @if (!loading && !error && filteredProducts.length > 0) {
 	<div class="catalog-grid">
-		@for (item of filteredProducts; track item._id) {
+		@for (item of filteredProducts; track productId(item)) {
 			<article class="catalog-card">
 				@if (item.image) {
 					<img [src]="item.image" class="product-image" [alt]="item.title" />
@@ -46,7 +46,7 @@
 					</div>
 					<p class="fw-semibold mb-3">₹{{ item.price }}</p>
 					<div class="mt-auto d-flex gap-2">
-						<a class="btn btn-outline-secondary btn-sm" [routerLink]="['/products', item._id]">View Details</a>
+						<a class="btn btn-outline-secondary btn-sm" [routerLink]="['/products', productId(item)]">View Details</a>
 						<button class="btn btn-dark btn-sm" type="button" (click)="addToCart(item)">Add to cart</button>
 					</div>
 				</div>

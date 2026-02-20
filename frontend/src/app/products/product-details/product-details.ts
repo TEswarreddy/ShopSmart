@@ -23,22 +23,28 @@ export class ProductDetails {
   ) {}
 
   ngOnInit(): void {
-    const id = this.route.snapshot.paramMap.get('id');
-    if (!id) {
-      this.error = 'Invalid product.';
-      this.loading = false;
-      return;
-    }
+    this.route.paramMap.subscribe((params) => {
+      const id = params.get('id');
 
-    this.productService.getProductById(id).subscribe({
-      next: (res) => {
-        this.product = res;
+      if (!id) {
+        this.error = 'Invalid product.';
         this.loading = false;
-      },
-      error: () => {
-        this.error = 'Product not found.';
-        this.loading = false;
+        return;
       }
+
+      this.loading = true;
+      this.error = '';
+
+      this.productService.getProductById(id).subscribe({
+        next: (res) => {
+          this.product = res;
+          this.loading = false;
+        },
+        error: () => {
+          this.error = 'Product not found.';
+          this.loading = false;
+        }
+      });
     });
   }
 

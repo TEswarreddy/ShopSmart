@@ -5,6 +5,7 @@ import { environment } from './environment';
 
 export interface ShopProduct {
   _id: string;
+  id?: string;
   title: string;
   description: string;
   price: number;
