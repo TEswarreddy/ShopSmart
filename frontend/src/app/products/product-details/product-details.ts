@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Product, ShopProduct } from '../../services/product';
 import { CartService } from '../../services/cart';
+import { catchError, of, switchMap, tap, timeout } from 'rxjs';
 
 @Component({
   selector: 'app-product-details',
@@ -23,29 +24,38 @@ export class ProductDetails {
   ) {}
 
   ngOnInit(): void {
-    this.route.paramMap.subscribe((params) => {
-      const id = params.get('id');
+    this.route.paramMap
+      .pipe(
+        tap(() => {
+          this.loading = true;
+          this.error = '';
+          this.product = null;
+        }),
+        switchMap((params) => {
+          const id = params.get('id');
 
-      if (!id) {
-        this.error = 'Invalid product.';
-        this.loading = false;
-        return;
-      }
+          if (!id) {
+            this.error = 'Invalid product.';
+            this.loading = false;
+            return of(null);
+          }
 
-      this.loading = true;
-      this.error = '';
-
-      this.productService.getProductById(id).subscribe({
-        next: (res) => {
+          return this.productService.getProductById(id).pipe(
+            timeout(10000),
+            catchError(() => {
+              this.error = 'Unable to load product details. Please try again.';
+              return of(null);
+            })
+          );
+        })
+      )
+      .subscribe((res) => {
+        if (res) {
           this.product = res;
-          this.loading = false;
-        },
-        error: () => {
-          this.error = 'Product not found.';
-          this.loading = false;
         }
+
+        this.loading = false;
       });
-    });
   }
 
   addToCart(): void {
