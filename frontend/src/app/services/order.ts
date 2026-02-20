@@ -27,6 +27,7 @@ export interface OrderResponse {
     _id: string;
     name: string;
     email: string;
+    phone?: string;
   };
   items: Array<{
     product: {
@@ -43,6 +44,22 @@ export interface OrderResponse {
   paymentMethod: string;
   paymentStatus: string;
   orderStatus: string;
+  dispute?: {
+    status: 'none' | 'raised' | 'resolved' | 'closed';
+    reason?: string;
+    description?: string;
+    resolution?: string;
+    raisedAt?: string;
+    resolvedAt?: string;
+  };
+  refund?: {
+    status: 'none' | 'requested' | 'approved' | 'processed' | 'rejected';
+    amount?: number;
+    reason?: string;
+    requestedAt?: string;
+    processedAt?: string;
+    transactionId?: string;
+  };
   shopTotalPrice?: number;
   shopItemCount?: number;
   createdAt: string;
@@ -121,5 +138,17 @@ export class OrderService {
 
   getShopSalesReport(): Observable<ShopSalesReportResponse> {
     return this.http.get<ShopSalesReportResponse>(`${environment.apiUrl}/orders/shop/sales-report`);
+  }
+
+  getAllOrdersDetailed(): Observable<OrderResponse[]> {
+    return this.http.get<OrderResponse[]>(`${environment.apiUrl}/orders/admin/all`);
+  }
+
+  handleDispute(orderId: string, action: 'raise' | 'resolve' | 'close', payload: { reason?: string; description?: string; resolution?: string }): Observable<OrderResponse> {
+    return this.http.post<OrderResponse>(`${environment.apiUrl}/orders/admin/${orderId}/dispute`, { action, ...payload });
+  }
+
+  processRefund(orderId: string, action: 'request' | 'approve' | 'reject' | 'process', payload: { amount?: number; reason?: string; transactionId?: string }): Observable<OrderResponse> {
+    return this.http.post<OrderResponse>(`${environment.apiUrl}/orders/admin/${orderId}/refund`, { action, ...payload });
   }
 }

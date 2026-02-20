@@ -1,8 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { AuthService, AdminShop, AdminUser } from '../../services/auth';
+import { AuthService, AdminShop, AdminUser, DashboardAnalytics, MonthlyRevenueData } from '../../services/auth';
 import { Product, ShopProduct } from '../../services/product';
+import { OrderService, OrderResponse } from '../../services/order';
+
+type AdminSection = 'overview' | 'shops' | 'users' | 'products' | 'orders';
 
 @Component({
   selector: 'app-role-dashboard',
@@ -15,18 +18,32 @@ export class RoleDashboard {
   shops: AdminShop[] = [];
   users: AdminUser[] = [];
   products: ShopProduct[] = [];
+  orders: OrderResponse[] = [];
+  analytics: DashboardAnalytics | null = null;
+  monthlyRevenue: MonthlyRevenueData[] = [];
   approvalLoading = false;
   approvalError = '';
   productLoading = false;
   productError = '';
+  orderLoading = false;
+  orderError = '';
+  analyticsLoading = false;
+  analyticsError = '';
+  selectedOrder: OrderResponse | null = null;
+  disputeAction = '';
+  refundAction = '';
+  sidebarOpen = false;
+  currentSection: AdminSection = 'overview';
 
-  constructor(public authService: AuthService, private productService: Product) {}
+  constructor(public authService: AuthService, private productService: Product, private orderService: OrderService) {}
 
   ngOnInit(): void {
     if (this.authService.role() === 'admin') {
+      this.loadAnalytics();
       this.loadShops();
       this.loadUsers();
       this.loadProducts();
+      this.loadOrders();
     }
   }
 
@@ -75,6 +92,35 @@ export class RoleDashboard {
     }
     return 'Browse Products';
   });
+
+  loadAnalytics(): void {
+    this.analyticsLoading = true;
+    this.analyticsError = '';
+
+    this.authService.getDashboardAnalytics().subscribe({
+      next: (data) => {
+        this.analytics = data;
+        this.loadMonthlyRevenue();
+      },
+      error: (err: { error?: { message?: string } }) => {
+        this.analyticsError = err.error?.message || 'Unable to load analytics.';
+        this.analyticsLoading = false;
+      }
+    });
+  }
+
+  loadMonthlyRevenue(): void {
+    this.authService.getMonthlyRevenueChart().subscribe({
+      next: (data) => {
+        this.monthlyRevenue = data;
+        this.analyticsLoading = false;
+      },
+      error: (err: { error?: { message?: string } }) => {
+        this.analyticsError = err.error?.message || 'Unable to load revenue chart.';
+        this.analyticsLoading = false;
+      }
+    });
+  }
 
   loadShops(): void {
     this.approvalLoading = true;
@@ -182,5 +228,158 @@ export class RoleDashboard {
         this.productError = err.error?.message || 'Unable to remove product.';
       }
     });
+  }
+
+  loadOrders(): void {
+    this.orderLoading = true;
+    this.orderError = '';
+
+    this.orderService.getAllOrdersDetailed().subscribe({
+      next: (orders) => {
+        this.orders = orders;
+        this.orderLoading = false;
+      },
+      error: (err: { error?: { message?: string } }) => {
+        this.orderError = err.error?.message || 'Unable to load orders.';
+        this.orderLoading = false;
+      }
+    });
+  }
+
+  selectOrder(order: OrderResponse): void {
+    this.selectedOrder = order;
+    this.disputeAction = '';
+    this.refundAction = '';
+  }
+
+  raiseDispute(order: OrderResponse): void {
+    const reason = prompt('Enter dispute reason:');
+    if (!reason) return;
+    const description = prompt('Enter dispute description:');
+    if (!description) return;
+
+    this.orderError = '';
+    this.orderService.handleDispute(order._id, 'raise', { reason, description }).subscribe({
+      next: () => {
+        this.loadOrders();
+        this.selectedOrder = null;
+      },
+      error: (err: { error?: { message?: string } }) => {
+        this.orderError = err.error?.message || 'Unable to raise dispute.';
+      }
+    });
+  }
+
+  resolveDispute(order: OrderResponse): void {
+    const resolution = prompt('Enter dispute resolution:');
+    if (!resolution) return;
+
+    this.orderError = '';
+    this.orderService.handleDispute(order._id, 'resolve', { resolution }).subscribe({
+      next: () => {
+        this.loadOrders();
+        this.selectedOrder = null;
+      },
+      error: (err: { error?: { message?: string } }) => {
+        this.orderError = err.error?.message || 'Unable to resolve dispute.';
+      }
+    });
+  }
+
+  closeDispute(order: OrderResponse): void {
+    this.orderError = '';
+    this.orderService.handleDispute(order._id, 'close', {}).subscribe({
+      next: () => {
+        this.loadOrders();
+        this.selectedOrder = null;
+      },
+      error: (err: { error?: { message?: string } }) => {
+        this.orderError = err.error?.message || 'Unable to close dispute.';
+      }
+    });
+  }
+
+  requestRefund(order: OrderResponse): void {
+    const amount = prompt(`Enter refund amount (max ₹${order.totalPrice}):`);
+    if (!amount) return;
+    const numAmount = Number(amount);
+    if (isNaN(numAmount) || numAmount <= 0) {
+      alert('Invalid amount');
+      return;
+    }
+
+    const reason = prompt('Enter refund reason:') || 'No reason provided';
+
+    this.orderError = '';
+    this.orderService.processRefund(order._id, 'request', { amount: numAmount, reason }).subscribe({
+      next: () => {
+        this.loadOrders();
+      },
+      error: (err: { error?: { message?: string } }) => {
+        this.orderError = err.error?.message || 'Unable to request refund.';
+      }
+    });
+  }
+
+  approveRefund(order: OrderResponse): void {
+    this.orderError = '';
+    this.orderService.processRefund(order._id, 'approve', {}).subscribe({
+      next: () => {
+        this.loadOrders();
+      },
+      error: (err: { error?: { message?: string } }) => {
+        this.orderError = err.error?.message || 'Unable to approve refund.';
+      }
+    });
+  }
+
+  processRefundPayment(order: OrderResponse): void {
+    const transactionId = prompt('Enter transaction ID for refund:');
+    if (!transactionId) return;
+
+    this.orderError = '';
+    this.orderService.processRefund(order._id, 'process', { transactionId }).subscribe({
+      next: () => {
+        this.loadOrders();
+        this.selectedOrder = null;
+      },
+      error: (err: { error?: { message?: string } }) => {
+        this.orderError = err.error?.message || 'Unable to process refund.';
+      }
+    });
+  }
+
+  rejectRefund(order: OrderResponse): void {
+    this.orderError = '';
+    this.orderService.processRefund(order._id, 'reject', {}).subscribe({
+      next: () => {
+        this.loadOrders();
+      },
+      error: (err: { error?: { message?: string } }) => {
+        this.orderError = err.error?.message || 'Unable to reject refund.';
+      }
+    });
+  }
+
+  getMaxRevenue(): number {
+    return this.monthlyRevenue.length > 0 ? Math.max(...this.monthlyRevenue.map(d => d.revenue), 1) : 1;
+  }
+
+  getBarHeight(revenue: number): number {
+    const max = this.getMaxRevenue();
+    return (revenue / max) * 200;
+  }
+
+  toggleSidebar(): void {
+    this.sidebarOpen = !this.sidebarOpen;
+  }
+
+  selectSection(section: AdminSection): void {
+    this.currentSection = section;
+    this.sidebarOpen = false;
+  }
+
+  isSectionActive(section: AdminSection): boolean {
+    return this.currentSection === section;
   }
 }

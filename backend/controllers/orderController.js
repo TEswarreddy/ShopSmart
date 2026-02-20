@@ -246,3 +246,121 @@ exports.getShopSalesReport = async (req, res) => {
     recentOrders: scopedOrders.slice(0, 10),
   });
 };
+
+// 🔍 Admin - View All Orders with Details
+exports.getAllOrdersDetailed = async (req, res) => {
+  const orders = await Order.find()
+    .populate("user", "name email phone")
+    .populate("items.product", "title price")
+    .sort({ createdAt: -1 });
+
+  res.json(orders);
+};
+
+// 🛑 Admin - Raise/Handle Dispute
+exports.handleDispute = async (req, res) => {
+  const { action, reason, description, resolution } = req.body;
+
+  if (!["raise", "resolve", "close"].includes(action)) {
+    return res.status(400).json({ message: "Invalid action. Must be 'raise', 'resolve', or 'close'." });
+  }
+
+  const order = await Order.findById(req.params.id);
+
+  if (!order) {
+    return res.status(404).json({ message: "Order not found" });
+  }
+
+  if (action === "raise") {
+    if (!reason || !description) {
+      return res.status(400).json({ message: "Reason and description are required" });
+    }
+    order.dispute = {
+      status: "raised",
+      reason,
+      description,
+      raisedAt: new Date()
+    };
+  } else if (action === "resolve") {
+    if (!resolution) {
+      return res.status(400).json({ message: "Resolution is required" });
+    }
+    order.dispute = {
+      ...order.dispute,
+      status: "resolved",
+      resolution,
+      resolvedAt: new Date()
+    };
+  } else if (action === "close") {
+    order.dispute = {
+      ...order.dispute,
+      status: "closed"
+    };
+  }
+
+  await order.save();
+  res.json(order);
+};
+
+// 💰 Admin - Process Refund (Advanced)
+exports.processRefund = async (req, res) => {
+  const { action, amount, reason, transactionId } = req.body;
+
+  if (!["request", "approve", "reject", "process"].includes(action)) {
+    return res.status(400).json({ message: "Invalid action. Must be 'request', 'approve', 'reject', or 'process'." });
+  }
+
+  const order = await Order.findById(req.params.id);
+
+  if (!order) {
+    return res.status(404).json({ message: "Order not found" });
+  }
+
+  if (action === "request") {
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ message: "Valid refund amount is required" });
+    }
+    if (amount > order.totalPrice) {
+      return res.status(400).json({ message: "Refund amount cannot exceed order total" });
+    }
+    order.refund = {
+      status: "requested",
+      amount,
+      reason: reason || "No reason provided",
+      requestedAt: new Date()
+    };
+  } else if (action === "approve") {
+    if (order.refund.status !== "requested") {
+      return res.status(400).json({ message: "Only requested refunds can be approved" });
+    }
+    order.refund = {
+      ...order.refund,
+      status: "approved"
+    };
+  } else if (action === "reject") {
+    if (order.refund.status !== "requested") {
+      return res.status(400).json({ message: "Only requested refunds can be rejected" });
+    }
+    order.refund = {
+      ...order.refund,
+      status: "rejected"
+    };
+  } else if (action === "process") {
+    if (order.refund.status !== "approved") {
+      return res.status(400).json({ message: "Only approved refunds can be processed" });
+    }
+    if (!transactionId) {
+      return res.status(400).json({ message: "Transaction ID is required for processing" });
+    }
+    order.refund = {
+      ...order.refund,
+      status: "processed",
+      processedAt: new Date(),
+      transactionId
+    };
+  }
+
+  await order.save();
+  res.json(order);
+};
+

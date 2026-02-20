@@ -118,6 +118,18 @@ export interface AdminUser {
   createdAt: string;
 }
 
+export interface DashboardAnalytics {
+  totalUsers: number;
+  totalShops: number;
+  totalOrders: number;
+  totalRevenue: number;
+}
+
+export interface MonthlyRevenueData {
+  month: string;
+  revenue: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -186,6 +198,14 @@ export class AuthService {
 
   deleteUser(userId: string): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(`${environment.apiUrl}/users/admin/users/${userId}`);
+  }
+
+  getDashboardAnalytics(): Observable<DashboardAnalytics> {
+    return this.http.get<DashboardAnalytics>(`${environment.apiUrl}/users/admin/analytics`);
+  }
+
+  getMonthlyRevenueChart(): Observable<MonthlyRevenueData[]> {
+    return this.http.get<MonthlyRevenueData[]>(`${environment.apiUrl}/users/admin/revenue-chart`);
   }
 
   logout(): void {

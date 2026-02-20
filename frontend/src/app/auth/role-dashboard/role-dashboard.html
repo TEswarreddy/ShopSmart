@@ -1,38 +1,156 @@
 <section class="dashboard-shell">
-  <div class="dashboard-card">
-    <p class="welcome">Welcome, {{ authService.user()?.name }}</p>
-    <h1>{{ heading() }}</h1>
-    <p class="desc">{{ description() }}</p>
+  @if (authService.role() === 'admin') {
+    <aside class="sidebar" [class.active]="sidebarOpen">
+      <div class="sidebar-brand">Admin Panel</div>
+      <button class="sidebar-toggle" (click)="toggleSidebar()">☰</button>
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-item">
+          <a class="sidebar-nav-link" [class.active]="isSectionActive('overview')" (click)="selectSection('overview')">
+            <span class="sidebar-nav-icon">📊</span>
+            <span>Overview</span>
+          </a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a class="sidebar-nav-link" [class.active]="isSectionActive('shops')" (click)="selectSection('shops')">
+            <span class="sidebar-nav-icon">🏪</span>
+            <span>Shop Management</span>
+          </a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a class="sidebar-nav-link" [class.active]="isSectionActive('users')" (click)="selectSection('users')">
+            <span class="sidebar-nav-icon">👥</span>
+            <span>User Management</span>
+          </a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a class="sidebar-nav-link" [class.active]="isSectionActive('products')" (click)="selectSection('products')">
+            <span class="sidebar-nav-icon">📦</span>
+            <span>Product Monitoring</span>
+          </a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a class="sidebar-nav-link" [class.active]="isSectionActive('orders')" (click)="selectSection('orders')">
+            <span class="sidebar-nav-icon">📋</span>
+            <span>Order Monitoring</span>
+          </a>
+        </li>
+      </ul>
+    </aside>
+  }
 
-    <div class="meta-grid">
-      <div>
-        <span class="meta-label">Role</span>
-        <strong>{{ authService.role() | titlecase }}</strong>
+  <div class="dashboard-content">
+    <div class="dashboard-card">
+      <p class="welcome">Welcome, {{ authService.user()?.name }}</p>
+      <h1>{{ heading() }}</h1>
+      <p class="desc">{{ description() }}</p>
+
+      <div class="meta-grid">
+        <div>
+          <span class="meta-label">Role</span>
+          <strong>{{ authService.role() | titlecase }}</strong>
+        </div>
+        <div>
+          <span class="meta-label">Email</span>
+          <strong>{{ authService.user()?.email }}</strong>
+        </div>
       </div>
-      <div>
-        <span class="meta-label">Email</span>
-        <strong>{{ authService.user()?.email }}</strong>
+
+      <div class="actions">
+        <a class="btn btn-warning" [routerLink]="primaryRoute()">{{ primaryLabel() }}</a>
+        @if (authService.role() === 'user') {
+          <a class="btn btn-outline-dark" routerLink="/cart">Open Cart</a>
+        }
       </div>
-    </div>
 
-    <div class="actions">
-      <a class="btn btn-warning" [routerLink]="primaryRoute()">{{ primaryLabel() }}</a>
-      @if (authService.role() === 'user') {
-        <a class="btn btn-outline-dark" routerLink="/cart">Open Cart</a>
-      }
-    </div>
+      @if (authService.role() === 'admin') {
+        <!-- Overview Section -->
+        @if (isSectionActive('overview')) {
+          <section class="mt-4">
+            <h2 class="h5">Dashboard Analytics</h2>
 
-    @if (authService.role() === 'admin') {
-      <section class="mt-4">
-        <h2 class="h5">Shop Management</h2>
+            @if (analyticsError) {
+              <div class="alert alert-danger" role="alert">{{ analyticsError }}</div>
+            }
 
-        @if (approvalError) {
-          <div class="alert alert-danger" role="alert">{{ approvalError }}</div>
+            @if (analyticsLoading) {
+              <p class="mb-0">Loading analytics...</p>
+            } @else {
+              @if (analytics) {
+                <div class="row g-3 mb-4">
+                  <div class="col-md-6 col-lg-3">
+                    <div class="card text-center">
+                      <div class="card-body">
+                        <h6 class="card-title">Total Users</h6>
+                        <h2 class="text-primary">{{ analytics.totalUsers }}</h2>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6 col-lg-3">
+                    <div class="card text-center">
+                      <div class="card-body">
+                        <h6 class="card-title">Total Shops</h6>
+                        <h2 class="text-success">{{ analytics.totalShops }}</h2>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6 col-lg-3">
+                    <div class="card text-center">
+                      <div class="card-body">
+                        <h6 class="card-title">Total Orders</h6>
+                        <h2 class="text-info">{{ analytics.totalOrders }}</h2>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6 col-lg-3">
+                    <div class="card text-center">
+                      <div class="card-body">
+                        <h6 class="card-title">Total Revenue</h6>
+                        <h2 class="text-warning">₹{{ analytics.totalRevenue }}</h2>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+            @if (monthlyRevenue.length > 0) {
+              <div class="card mt-4 mb-4">
+                <div class="card-body">
+                  <h6 class="card-title mb-3">Monthly Revenue (12 Months)</h6>
+                  <div style="overflow-x: auto;">
+                    <div class="d-flex align-items-flex-end gap-2" style="height: 250px; min-width: 600px; padding: 10px;">
+                      @for (item of monthlyRevenue; track $index) {
+                        <div class="text-center flex-grow-1">
+                          <div style="background: #007bff; height: {{ getBarHeight(item.revenue) }}px; min-height: 5px; margin-bottom: 5px; border-radius: 3px;" title="{{ item.month }}: ₹{{ item.revenue }}"></div>
+                          <small class="text-muted d-block" style="font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ item.month }}</small>
+                          <small class="text-muted d-block">₹{{ item.revenue }}</small>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                  <div class="mt-3">
+                    <small class="text-muted">
+                      Revenue is calculated from completed payments. Chart shows last 12 months.
+                    </small>
+                  </div>
+                </div>
+              </div>
+            }
+          }
+        }
+      </section>
         }
 
-        @if (approvalLoading) {
-          <p class="mb-0">Loading shops...</p>
-        } @else {
+        <!-- Shop Management Section -->
+        @if (isSectionActive('shops')) {
+          <section class="mt-4">
+            <h2 class="h5">Shop Management</h2>
+
+            @if (approvalError) {
+              <div class="alert alert-danger" role="alert">{{ approvalError }}</div>
+            }
+
+            @if (approvalLoading) {
+              <p class="mb-0">Loading shops...</p>
+            } @else {
           @if (shops.length === 0) {
             <p class="text-muted mb-0">No shops found.</p>
           } @else {
@@ -74,22 +192,25 @@
           }
         }
       </section>
+        }
 
-      <section class="mt-4">
-        <h2 class="h5">User Management</h2>
+        <!-- User Management Section -->
+        @if (isSectionActive('users')) {
+          <section class="mt-4">
+            <h2 class="h5">User Management</h2>
 
-        @if (users.length === 0) {
-          <p class="text-muted mb-0">No users found.</p>
-        } @else {
-          <div class="table-responsive">
-            <table class="table table-sm align-middle">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Phone</th>
-                  <th>Status</th>
-                  <th>Joined</th>
+            @if (users.length === 0) {
+              <p class="text-muted mb-0">No users found.</p>
+            } @else {
+              <div class="table-responsive">
+                <table class="table table-sm align-middle">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Phone</th>
+                      <th>Status</th>
+                      <th>Joined</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -114,19 +235,22 @@
           </div>
         }
       </section>
-
-      <section class="mt-4">
-        <h2 class="h5">Product Monitoring</h2>
-
-        @if (productError) {
-          <div class="alert alert-danger" role="alert">{{ productError }}</div>
         }
 
-        @if (productLoading) {
-          <p class="mb-0">Loading products...</p>
-        } @else {
-          @if (products.length === 0) {
-            <p class="text-muted mb-0">No products found.</p>
+        <!-- Product Monitoring Section -->
+        @if (isSectionActive('products')) {
+          <section class="mt-4">
+            <h2 class="h5">Product Monitoring</h2>
+
+            @if (productError) {
+              <div class="alert alert-danger" role="alert">{{ productError }}</div>
+            }
+
+            @if (productLoading) {
+              <p class="mb-0">Loading products...</p>
+            } @else {
+              @if (products.length === 0) {
+                <p class="text-muted mb-0">No products found.</p>
           } @else {
             <div class="table-responsive">
               <table class="table table-sm align-middle">
@@ -165,6 +289,115 @@
           }
         }
       </section>
-    }
+        }
+
+        <!-- Order Monitoring Section -->
+        @if (isSectionActive('orders')) {
+          <section class="mt-4">
+            <h2 class="h5">Order Monitoring</h2>
+
+            @if (orderError) {
+              <div class="alert alert-danger" role="alert">{{ orderError }}</div>
+            }
+
+            @if (orderLoading) {
+              <p class="mb-0">Loading orders...</p>
+            } @else {
+              @if (orders.length === 0) {
+                <p class="text-muted mb-0">No orders found.</p>
+              } @else {
+                <div class="table-responsive">
+                  <table class="table table-sm align-middle">
+                    <thead>
+                      <tr>
+                        <th>Order ID</th>
+                    <th>Customer</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Payment</th>
+                    <th>Dispute</th>
+                    <th>Refund</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (order of orders; track order._id) {
+                    <tr>
+                      <td><strong>{{ order._id.substring(0, 8) }}...</strong></td>
+                      <td>{{ order.user?.name || '-' }}</td>
+                      <td>₹{{ order.totalPrice }}</td>
+                      <td>{{ order.orderStatus }}</td>
+                      <td>{{ order.paymentStatus }}</td>
+                      <td>
+                        <span class="badge" [class.bg-danger]="order.dispute?.status === 'raised'" [class.bg-warning]="order.dispute?.status === 'resolved'" [class.bg-secondary]="order.dispute?.status === 'none' || order.dispute?.status === 'closed'">
+                          {{ order.dispute?.status || 'None' }}
+                        </span>
+                      </td>
+                      <td>
+                        <span class="badge" [class.bg-danger]="order.refund?.status === 'requested'" [class.bg-warning]="order.refund?.status === 'approved'" [class.bg-success]="order.refund?.status === 'processed'" [class.bg-secondary]="order.refund?.status === 'none' || order.refund?.status === 'rejected'">
+                          {{ order.refund?.status || 'None' }}
+                        </span>
+                      </td>
+                      <td>{{ order.createdAt | date: 'mediumDate' }}</td>
+                      <td>
+                        <button class="btn btn-sm btn-outline-primary" type="button" (click)="selectOrder(order)">Details</button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            @if (selectedOrder) {
+              <div class="alert alert-info mt-3" role="alert">
+                <h6>Order Details: {{ selectedOrder._id }}</h6>
+                <p class="mb-2"><strong>Customer:</strong> {{ selectedOrder.user?.name }} ({{ selectedOrder.user?.email }})</p>
+                <p class="mb-2"><strong>Total:</strong> ₹{{ selectedOrder.totalPrice }}</p>
+                <p class="mb-2"><strong>Status:</strong> {{ selectedOrder.orderStatus }} | <strong>Payment:</strong> {{ selectedOrder.paymentStatus }}</p>
+                
+                <div class="mt-3">
+                  <strong>Dispute Management:</strong>
+                  <div class="btn-group gap-2 d-flex flex-wrap mt-2">
+                    @if (selectedOrder.dispute?.status === 'none') {
+                      <button class="btn btn-sm btn-warning" type="button" (click)="raiseDispute(selectedOrder)">Raise Dispute</button>
+                    }
+                    @if (selectedOrder.dispute?.status === 'raised') {
+                      <button class="btn btn-sm btn-info" type="button" (click)="resolveDispute(selectedOrder)">Mark Resolved</button>
+                    }
+                    @if (selectedOrder.dispute?.status === 'resolved' || selectedOrder.dispute?.status === 'raised') {
+                      <button class="btn btn-sm btn-outline-secondary" type="button" (click)="closeDispute(selectedOrder)">Close Dispute</button>
+                    }
+                  </div>
+                </div>
+
+                <div class="mt-3">
+                  <strong>Refund Management:</strong>
+                  <div class="btn-group gap-2 d-flex flex-wrap mt-2">
+                    @if (selectedOrder.refund?.status === 'none') {
+                      <button class="btn btn-sm btn-warning" type="button" (click)="requestRefund(selectedOrder)">Request Refund</button>
+                    }
+                    @if (selectedOrder.refund?.status === 'requested') {
+                      <button class="btn btn-sm btn-success" type="button" (click)="approveRefund(selectedOrder)">Approve Refund</button>
+                      <button class="btn btn-sm btn-outline-danger" type="button" (click)="rejectRefund(selectedOrder)">Reject Refund</button>
+                    }
+                    @if (selectedOrder.refund?.status === 'approved') {
+                      <button class="btn btn-sm btn-success" type="button" (click)="processRefundPayment(selectedOrder)">Process Payment</button>
+                    }
+                  </div>
+                  @if (selectedOrder.refund?.status !== 'none') {
+                    <p class="small text-muted mt-2">Amount: ₹{{ selectedOrder.refund?.amount || 0 }}</p>
+                  }
+                </div>
+
+                <button class="btn btn-sm btn-outline-secondary mt-3" type="button" (click)="selectedOrder = null">Close Details</button>
+              </div>
+            }
+          }
+        }
+      </section>
+        }
+      }
+    </div>
   </div>
 </section>

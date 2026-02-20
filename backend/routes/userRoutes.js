@@ -13,6 +13,8 @@ const {
 	getAllUsers,
 	updateUserBlockStatus,
 	deleteUser,
+	getDashboardAnalytics,
+	getMonthlyRevenueChart
 } = require("../controllers/userController");
 const { protect, admin } = require("../middleware/authMiddleware");
 
@@ -31,5 +33,7 @@ router.delete("/shops/:id", protect, admin, deleteShop);
 router.get("/admin/users", protect, admin, getAllUsers);
 router.put("/admin/users/:id/block", protect, admin, updateUserBlockStatus);
 router.delete("/admin/users/:id", protect, admin, deleteUser);
+router.get("/admin/analytics", protect, admin, getDashboardAnalytics);
+router.get("/admin/revenue-chart", protect, admin, getMonthlyRevenueChart);
 
 module.exports = router;

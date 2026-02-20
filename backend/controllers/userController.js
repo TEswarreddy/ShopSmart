@@ -442,3 +442,46 @@ exports.deleteUser = async (req, res) => {
   await user.deleteOne();
   res.json({ message: "User deleted" });
 };
+
+// 📊 Admin - Get Dashboard Analytics
+exports.getDashboardAnalytics = async (req, res) => {
+  const totalUsers = await User.countDocuments({ role: "user" });
+  const totalShops = await User.countDocuments({ role: "shop", shopApprovalStatus: "approved" });
+  const totalOrders = await Order.countDocuments();
+  
+  const ordersWithPayment = await Order.find({ paymentStatus: "Completed" });
+  const totalRevenue = ordersWithPayment.reduce((sum, order) => sum + (order.totalPrice || 0), 0);
+
+  res.json({
+    totalUsers,
+    totalShops,
+    totalOrders,
+    totalRevenue
+  });
+};
+
+// 📈 Admin - Get Monthly Revenue Chart Data
+exports.getMonthlyRevenueChart = async (req, res) => {
+  const months = 12;
+  const monthlyData = [];
+  const now = new Date();
+
+  for (let i = months - 1; i >= 0; i--) {
+    const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const nextDate = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
+
+    const orders = await Order.find({
+      createdAt: { $gte: date, $lt: nextDate },
+      paymentStatus: "Completed"
+    });
+
+    const revenue = orders.reduce((sum, order) => sum + (order.totalPrice || 0), 0);
+
+    monthlyData.push({
+      month: date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+      revenue: Math.round(revenue * 100) / 100
+    });
+  }
+
+  res.json(monthlyData);
+};
