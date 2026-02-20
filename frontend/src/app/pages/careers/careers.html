@@ -1,0 +1,63 @@
+<div class="pages-container">
+  <div class="page-hero">
+    <h1>Join Our Team</h1>
+    <p>Build the future of e-commerce with us</p>
+  </div>
+
+  <div class="content-section container mt-5">
+    <h2>Why Work at ShopSmart?</h2>
+    <div class="why-cards">
+      <div class="why-card">
+        <h3>🚀 Growth</h3>
+        <p>Fast-growing company with endless learning opportunities</p>
+      </div>
+      <div class="why-card">
+        <h3>💡 Innovation</h3>
+        <p>Work on cutting-edge technologies and solve real problems</p>
+      </div>
+      <div class="why-card">
+        <h3>🤝 Culture</h3>
+        <p>Collaborative team environment with supportive colleagues</p>
+      </div>
+      <div class="why-card">
+        <h3>💰 Competitive</h3>
+        <p>Industry-leading salaries and comprehensive benefits</p>
+      </div>
+    </div>
+
+    <h2 class="mt-5">Open Positions</h2>
+    <div class="jobs-list">
+      @for (job of jobs; track job.title) {
+        <div class="job-card">
+          <div class="job-header">
+            <h3>{{ job.title }}</h3>
+            <span class="job-type">{{ job.type }}</span>
+          </div>
+          <div class="job-details">
+            <span class="location">📍 {{ job.location }}</span>
+          </div>
+          <a href="mailto:careers@shopsmart.com" class="btn btn-sm btn-outline-primary">Apply Now</a>
+        </div>
+      }
+    </div>
+
+    <div class="benefits-section mt-5">
+      <h2>Benefits & Perks</h2>
+      <ul class="benefits-list">
+        <li>Health insurance for you and your family</li>
+        <li>Work from office and remote flexibility</li>
+        <li>Professional development budget</li>
+        <li>Performance bonuses and stock options</li>
+        <li>Casual dress code</li>
+        <li>Quarterly team outings and events</li>
+        <li>Mentorship from industry experts</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="cta-section mt-5">
+    <h2>Ready to join us?</h2>
+    <p>Send your resume and cover letter to <strong>careers@shopsmart.com</strong></p>
+    <a href="mailto:careers@shopsmart.com" class="btn btn-primary btn-lg">Send Application</a>
+  </div>
+</div>

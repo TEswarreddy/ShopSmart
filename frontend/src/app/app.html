@@ -82,8 +82,8 @@
 					<a class="sub-link" routerLink="/login/user" routerLinkActive="active" (click)="closeMenu()">Sign In</a>
 					<a class="sub-link" routerLink="/register/user" routerLinkActive="active" (click)="closeMenu()">Register</a>
 				}
-				<a class="sub-link" routerLink="/" (click)="closeMenu()">Today's Deals</a>
-				<a class="sub-link" routerLink="/" (click)="closeMenu()">Customer Service</a>
+				<a class="sub-link" routerLink="/deals" routerLinkActive="active" (click)="closeMenu()">Today's Deals</a>
+				<a class="sub-link" routerLink="/support" routerLinkActive="active" (click)="closeMenu()">Customer Service</a>
 				@if (authService.isLoggedIn()) {
 					<button class="sub-link sub-btn" type="button" (click)="logout()">Logout</button>
 				}
@@ -101,21 +101,21 @@
 		<div class="footer-columns container">
 			<div>
 				<h2>Get to Know Us</h2>
-				<a routerLink="/">About ShopSmart</a>
-				<a routerLink="/">Careers</a>
-				<a routerLink="/">Press Releases</a>
+				<a routerLink="/about-us">About ShopSmart</a>
+				<a routerLink="/careers">Careers</a>
+				<a routerLink="/contact">Press Releases</a>
 			</div>
 			<div>
 				<h2>Make Money with Us</h2>
-				<a routerLink="/">Sell on ShopSmart</a>
-				<a routerLink="/">Advertise Products</a>
-				<a routerLink="/">Affiliate Program</a>
+				<a routerLink="/sell">Sell on ShopSmart</a>
+				<a routerLink="/advertise">Advertise Products</a>
+				<a routerLink="/affiliate">Affiliate Program</a>
 			</div>
 			<div>
 				<h2>Help</h2>
-				<a routerLink="/">Payments</a>
-				<a routerLink="/">Shipping</a>
-				<a routerLink="/">Returns</a>
+				<a routerLink="/help">Payments</a>
+				<a routerLink="/help">Shipping</a>
+				<a routerLink="/help">Returns</a>
 			</div>
 		</div>
 

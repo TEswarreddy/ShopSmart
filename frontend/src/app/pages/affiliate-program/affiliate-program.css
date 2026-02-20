@@ -1,0 +1,305 @@
+.pages-container {
+  min-height: calc(100vh - 300px);
+  padding-bottom: 2rem;
+}
+
+.page-hero {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  color: white;
+  padding: 3rem 1rem;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.page-hero h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.page-hero p {
+  font-size: 1.1rem;
+  opacity: 0.9;
+}
+
+.content-section {
+  padding: 2rem 1rem;
+}
+
+.content-section h2 {
+  font-size: 2rem;
+  color: #2c3e50;
+  margin-bottom: 2rem;
+  font-weight: 700;
+}
+
+.earnings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.earnings-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.earnings-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+}
+
+.earnings-card h3 {
+  font-size: 1.3rem;
+  color: #2c3e50;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+}
+
+.earnings-card .amount {
+  font-size: 2rem;
+  color: #fa709a;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.earnings-card p {
+  color: #7f8c8d;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.how-it-works {
+  padding: 2rem;
+  background: #f8f9fa;
+  border-radius: 10px;
+}
+
+.how-it-works h2 {
+  color: #2c3e50;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
+}
+
+.step {
+  text-align: center;
+  position: relative;
+}
+
+.step-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  color: white;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 0 auto 1rem;
+  box-shadow: 0 4px 15px rgba(250, 112, 154, 0.3);
+}
+
+.step h3 {
+  font-size: 1.2rem;
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.step p {
+  color: #7f8c8d;
+  font-size: 0.95rem;
+}
+
+.benefits-section {
+  padding: 2rem;
+  background: white;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+}
+
+.benefits-section h2 {
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+}
+
+.benefits-list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.benefits-list li {
+  padding: 0.75rem;
+  color: #555;
+  font-size: 0.95rem;
+}
+
+.benefits-list li:before {
+  content: '✓ ';
+  color: #fa709a;
+  font-weight: bold;
+  margin-right: 0.5rem;
+}
+
+.commission-table {
+  padding: 2rem;
+  background: #f8f9fa;
+  border-radius: 10px;
+}
+
+.commission-table h2 {
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.table thead {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  color: white;
+}
+
+.table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+}
+
+.table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  color: #555;
+  font-size: 0.95rem;
+}
+
+.table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.cta-section {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  color: white;
+  padding: 3rem 1rem;
+  text-align: center;
+}
+
+.cta-section h2 {
+  color: white;
+  margin-bottom: 1rem;
+}
+
+.cta-section p {
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+}
+
+.cta-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  text-decoration: none;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background: white;
+  color: #fa709a;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.btn-outline-primary {
+  border: 2px solid white;
+  color: white;
+  background: transparent;
+}
+
+.btn-outline-primary:hover {
+  background: white;
+  color: #fa709a;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .page-hero h1 {
+    font-size: 1.75rem;
+  }
+
+  .page-hero p {
+    font-size: 1rem;
+  }
+
+  .content-section h2 {
+    font-size: 1.5rem;
+  }
+
+  .earnings-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .steps {
+    grid-template-columns: 1fr;
+  }
+
+  .benefits-list {
+    grid-template-columns: 1fr;
+  }
+
+  .cta-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .cta-buttons .btn {
+    width: 100%;
+  }
+
+  .cta-section {
+    padding: 2rem 1rem;
+  }
+
+  .table {
+    font-size: 0.85rem;
+  }
+
+  .table th,
+  .table td {
+    padding: 0.5rem;
+  }
+}

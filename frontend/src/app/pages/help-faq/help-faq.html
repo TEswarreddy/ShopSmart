@@ -1,0 +1,54 @@
+<div class="pages-container">
+  <div class="page-hero">
+    <h1>Help Center</h1>
+    <p>Find answers to your questions</p>
+  </div>
+
+  <div class="content-section container mt-5">
+    <h2>Frequently Asked Questions</h2>
+
+    <div class="help-categories mb-4">
+      <a href="#payments" class="category-link">💳 Payments</a>
+      <a href="#shipping" class="category-link">📦 Shipping</a>
+      <a href="#returns" class="category-link">↩️ Returns</a>
+      <a href="#account" class="category-link">👤 Account</a>
+    </div>
+
+    <div class="faq-list">
+      @for (item of faqs; track item.id) {
+        <div class="faq-item" [class.expanded]="isFaqExpanded(item.id)">
+          <button class="faq-header" (click)="toggleFaq(item.id)">
+            <span class="faq-question">{{ item.question }}</span>
+            <span class="faq-toggle">{{ isFaqExpanded(item.id) ? '−' : '+' }}</span>
+          </button>
+          @if (isFaqExpanded(item.id)) {
+            <div class="faq-answer">
+              {{ item.answer }}
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="support-cards mt-5">
+      <h3>Still need help?</h3>
+      <div class="support-grid">
+        <div class="support-card">
+          <h4>📧 Email Support</h4>
+          <p>support@shopsmart.com</p>
+          <p class="small text-muted">Response time: 24 hours</p>
+        </div>
+        <div class="support-card">
+          <h4>💬 Live Chat</h4>
+          <p>Available 24/7 during business hours</p>
+          <button class="btn btn-sm btn-primary">Start Chat</button>
+        </div>
+        <div class="support-card">
+          <h4>📞 Phone Support</h4>
+          <p>1800-SHOP-SMART</p>
+          <p class="small text-muted">Mon-Fri: 9AM - 6PM</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

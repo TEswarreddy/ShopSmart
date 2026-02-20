@@ -1,0 +1,59 @@
+<div class="deals-container">
+  <div class="deals-hero">
+    <div class="deals-header">
+      <h1>Today's Deals</h1>
+      <p>Limited-time offers ending soon!</p>
+    </div>
+    <div class="deals-stats">
+      <div class="stat">
+        <strong>{{ deals.length }}</strong>
+        <span>Active Deals</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="deals-grid">
+    @for (deal of deals; track deal.id) {
+      <div class="deal-card" [class.fast-selling]="isFastSelling(deal.reviews)">
+        @if (isFastSelling(deal.reviews)) {
+          <div class="fast-selling-badge">🔥 FAST SELLING</div>
+        }
+        <div class="deal-countdown">
+          <span class="time-left">Ends in {{ getTimeText(deal.endsIn) }}</span>
+          <div class="countdown-bar">
+            <div class="countdown-progress" [style.width.%]="getProgressPercentage(deal.endsIn)"></div>
+          </div>
+        </div>
+
+        <div class="deal-image">{{ deal.image }}</div>
+
+        <div class="deal-content">
+          <div class="deal-category">{{ deal.category }}</div>
+          <h3 class="deal-title">{{ deal.title }}</h3>
+
+          <div class="deal-rating">
+            <span class="stars">⭐</span>
+            <span class="rating-text">{{ deal.rating }} ({{ deal.reviews | number }})</span>
+          </div>
+
+          <div class="deal-pricing">
+            <div class="price-section">
+              <span class="current-price">₹{{ deal.price | number }}</span>
+              <span class="original-price">₹{{ deal.originalPrice | number }}</span>
+            </div>
+            <div class="discount-badge">-{{ deal.discount }}%</div>
+          </div>
+
+          <button class="btn btn-primary btn-block">Add to Cart</button>
+          <button class="btn btn-outline-secondary btn-block btn-sm">View Details</button>
+        </div>
+      </div>
+    }
+  </div>
+
+  <div class="deals-cta">
+    <h2>Missed Today's Deals?</h2>
+    <p>Check back tomorrow for new offers and exclusive discounts</p>
+    <a routerLink="/" class="btn btn-primary btn-lg">Continue Shopping</a>
+  </div>
+</div>

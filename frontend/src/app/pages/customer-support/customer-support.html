@@ -1,0 +1,145 @@
+<div class="support-container">
+  <!-- Main Support Page -->
+  <div class="support-hero">
+    <h1>24/7 Customer Support</h1>
+    <p>We're here to help whenever you need us</p>
+  </div>
+
+  <div class="support-content container">
+    <div class="row">
+      <div class="col-lg-6">
+        <div class="support-card">
+          <h2>💬 Live Chat</h2>
+          <p class="support-description">Chat with our support team in real-time for instant assistance</p>
+          <div class="status-indicator">
+            <span class="status-dot" [style.backgroundColor]="getStatusColor()"></span>
+            <span class="status-text">{{ agentStatus() === 'online' ? '✓ Online' : agentStatus() === 'away' ? '⏳ Away' : 'Offline' }}</span>
+          </div>
+          <p class="wait-time">Average response: {{ estimatedWaitTime() }}</p>
+          <button class="btn btn-primary btn-lg" (click)="toggleChat()">Start Chat Now</button>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="support-card">
+          <h2>📧 Email Support</h2>
+          <p class="support-description">Get detailed help via email</p>
+          <p class="contact-info">
+            <strong>support@shopsmart.com</strong><br>
+            <small>Response time: 2-4 hours</small>
+          </p>
+          <a href="mailto:support@shopsmart.com" class="btn btn-outline-primary btn-lg">Send Email</a>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="support-card">
+          <h2>📞 Phone Support</h2>
+          <p class="support-description">Talk to our support team directly</p>
+          <p class="contact-info">
+            <strong>1800-SHOP-SMART</strong><br>
+            <small>9 AM - 6 PM IST (Mon-Fri)</small>
+          </p>
+          <a href="tel:18008746762" class="btn btn-outline-primary btn-lg">Call Now</a>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="support-card">
+          <h2>📚 Help Center</h2>
+          <p class="support-description">Browse FAQs and knowledge base</p>
+          <p class="support-description-sub">Find answers to common questions instantly</p>
+          <a routerLink="/help" class="btn btn-outline-primary btn-lg">Browse Help</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-section">
+      <h2 class="text-center mb-4">Common Issues & Quick Solutions</h2>
+      <div class="quick-solutions">
+        <div class="solution-card">
+          <h4>🚚 Track Your Order</h4>
+          <p>Monitor your purchase in real-time</p>
+        </div>
+        <div class="solution-card">
+          <h4>↩️ Return a Product</h4>
+          <p>Easy return process within 30 days</p>
+        </div>
+        <div class="solution-card">
+          <h4>💳 Payment Issues</h4>
+          <p>Secure payment methods & options</p>
+        </div>
+        <div class="solution-card">
+          <h4>❓ General Questions</h4>
+          <p>Account, shipping, and more</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat Widget -->
+  <div class="chat-widget" [class.open]="isChatOpen()">
+    <div class="chat-header">
+      <div class="header-content">
+        <h3>ShopSmart Support</h3>
+        <span class="agent-status">
+          <span class="dot" [style.backgroundColor]="getStatusColor()"></span>
+          {{ agentStatus() === 'online' ? 'Agent Online' : agentStatus() === 'away' ? 'Agent Away' : 'Offline' }}
+        </span>
+      </div>
+      <button class="close-btn" (click)="toggleChat()">✕</button>
+    </div>
+
+    <div class="chat-messages">
+      @for (message of messages(); track message.id) {
+        <div class="message" [class.user]="message.sender === 'user'">
+          <div class="message-content">
+            @if (message.sender === 'support') {
+              <div class="message-avatar">🤖</div>
+            }
+            <div class="message-text">{{ message.text }}</div>
+            <div class="message-time">{{ message.timestamp | date: 'HH:mm' }}</div>
+          </div>
+        </div>
+      }
+
+      @if (isLoading()) {
+        <div class="message support">
+          <div class="message-content">
+            <div class="message-avatar">🤖</div>
+            <div class="typing-indicator">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="chat-input-area">
+      <input
+        type="text"
+        class="chat-input"
+        [value]="messageInput()"
+        (input)="messageInput.set($any($event.target).value)"
+        (keyup.enter)="sendMessage()"
+        placeholder="Type your message..."
+        [disabled]="isLoading()"
+      />
+      <button class="send-btn" (click)="sendMessage()" [disabled]="!messageInput() || isLoading()">
+        📤
+      </button>
+    </div>
+  </div>
+
+  <!-- Chat Toggle Button (when closed) -->
+  @if (!isChatOpen()) {
+    <button class="chat-toggle-btn" (click)="toggleChat()">
+      <span class="chat-icon">💬</span>
+      @if (unreadCount() > 0) {
+        <span class="badge">{{ unreadCount() }}</span>
+      }
+    </button>
+  }
+</div>
