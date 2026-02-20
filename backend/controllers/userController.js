@@ -1,4 +1,6 @@
 const User = require("../models/User");
+const Product = require("../models/Product");
+const Order = require("../models/Order");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
@@ -154,6 +156,9 @@ exports.loginUser = async (req, res) => {
     }
 
     if (user.role === "shop" && user.shopApprovalStatus !== "approved") {
+      if (user.shopApprovalStatus === "suspended") {
+        return res.status(403).json({ message: "Your shop account is suspended by admin" });
+      }
       if (user.shopApprovalStatus === "rejected") {
         return res.status(403).json({ message: "Your shop account was rejected by admin" });
       }
@@ -293,8 +298,8 @@ exports.getPendingShops = async (req, res) => {
 exports.updateShopApprovalStatus = async (req, res) => {
   const { status } = req.body;
 
-  if (!["approved", "rejected"].includes(status)) {
-    return res.status(400).json({ message: "Status must be approved or rejected" });
+  if (!["approved", "rejected", "suspended", "pending"].includes(status)) {
+    return res.status(400).json({ message: "Invalid shop status" });
   }
 
   const shop = await User.findById(req.params.id);
@@ -314,4 +319,77 @@ exports.updateShopApprovalStatus = async (req, res) => {
     shopApprovalStatus: shop.shopApprovalStatus,
     shopDetails: shop.shopDetails,
   });
+};
+
+exports.getAllShopsWithSales = async (req, res) => {
+  const shops = await User.find({ role: "shop" })
+    .select("name email phone shopDetails shopApprovalStatus createdAt")
+    .sort({ createdAt: -1 });
+
+  const shopIds = shops.map((shop) => shop._id.toString());
+
+  const products = await Product.find({ shop: { $in: shopIds } }).select("_id shop");
+  const productCountByShop = new Map();
+  const productToShop = new Map();
+
+  for (const product of products) {
+    const shopId = product.shop?.toString();
+    if (!shopId) continue;
+    productToShop.set(product._id.toString(), shopId);
+    productCountByShop.set(shopId, (productCountByShop.get(shopId) || 0) + 1);
+  }
+
+  const orders = await Order.find({ "items.product": { $in: products.map((p) => p._id) } })
+    .populate("items.product", "_id shop price");
+
+  const salesByShop = new Map();
+  const orderCountByShop = new Map();
+
+  for (const order of orders) {
+    const shopSeenInOrder = new Set();
+
+    for (const item of order.items || []) {
+      const product = item.product;
+      const productId = product?._id?.toString?.();
+      const shopId = productId ? productToShop.get(productId) : undefined;
+      if (!shopId) continue;
+
+      const lineTotal = Number(product.price || 0) * Number(item.quantity || 0);
+      salesByShop.set(shopId, (salesByShop.get(shopId) || 0) + lineTotal);
+      shopSeenInOrder.add(shopId);
+    }
+
+    for (const shopId of shopSeenInOrder) {
+      orderCountByShop.set(shopId, (orderCountByShop.get(shopId) || 0) + 1);
+    }
+  }
+
+  const result = shops.map((shop) => {
+    const shopId = shop._id.toString();
+    return {
+      _id: shop._id,
+      name: shop.name,
+      email: shop.email,
+      phone: shop.phone,
+      shopApprovalStatus: shop.shopApprovalStatus,
+      shopDetails: shop.shopDetails,
+      createdAt: shop.createdAt,
+      totalProducts: productCountByShop.get(shopId) || 0,
+      totalSales: salesByShop.get(shopId) || 0,
+      totalOrders: orderCountByShop.get(shopId) || 0,
+    };
+  });
+
+  res.json(result);
+};
+
+exports.deleteShop = async (req, res) => {
+  const shop = await User.findById(req.params.id);
+
+  if (!shop || shop.role !== "shop") {
+    return res.status(404).json({ message: "Shop account not found" });
+  }
+
+  await shop.deleteOne();
+  res.json({ message: "Shop deleted" });
 };

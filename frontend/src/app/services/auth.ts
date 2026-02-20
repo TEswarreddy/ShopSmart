@@ -15,7 +15,7 @@ export interface AuthUser {
   email: string;
   phone?: string;
   role: UserRole;
-  shopApprovalStatus?: 'pending' | 'approved' | 'rejected';
+  shopApprovalStatus?: 'pending' | 'approved' | 'rejected' | 'suspended';
   profile?: {
     gender?: string;
     dateOfBirth?: string;
@@ -98,9 +98,15 @@ export interface PendingShop {
   name: string;
   email: string;
   phone?: string;
-  shopApprovalStatus: 'pending' | 'approved' | 'rejected';
+  shopApprovalStatus: 'pending' | 'approved' | 'rejected' | 'suspended';
   createdAt: string;
   shopDetails?: AuthUser['shopDetails'];
+}
+
+export interface AdminShop extends PendingShop {
+  totalProducts: number;
+  totalSales: number;
+  totalOrders: number;
 }
 
 @Injectable({
@@ -145,8 +151,20 @@ export class AuthService {
     return this.http.get<PendingShop[]>(`${environment.apiUrl}/users/shops/pending`);
   }
 
-  updateShopApprovalStatus(shopId: string, status: 'approved' | 'rejected'): Observable<PendingShop> {
+  updateShopApprovalStatus(shopId: string, status: 'approved' | 'rejected' | 'suspended' | 'pending'): Observable<PendingShop> {
     return this.http.put<PendingShop>(`${environment.apiUrl}/users/shops/${shopId}/approval`, { status });
+  }
+
+  getAllShops(): Observable<AdminShop[]> {
+    return this.http.get<AdminShop[]>(`${environment.apiUrl}/users/shops`);
+  }
+
+  updateShopStatus(shopId: string, status: 'pending' | 'approved' | 'rejected' | 'suspended'): Observable<PendingShop> {
+    return this.http.put<PendingShop>(`${environment.apiUrl}/users/shops/${shopId}/status`, { status });
+  }
+
+  deleteShop(shopId: string): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${environment.apiUrl}/users/shops/${shopId}`);
   }
 
   logout(): void {

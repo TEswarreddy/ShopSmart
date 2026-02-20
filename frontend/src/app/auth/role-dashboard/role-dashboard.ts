@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { AuthService, PendingShop } from '../../services/auth';
+import { AuthService, AdminShop } from '../../services/auth';
 
 @Component({
   selector: 'app-role-dashboard',
@@ -11,7 +11,7 @@ import { AuthService, PendingShop } from '../../services/auth';
   styleUrl: './role-dashboard.css'
 })
 export class RoleDashboard {
-  pendingShops: PendingShop[] = [];
+  shops: AdminShop[] = [];
   approvalLoading = false;
   approvalError = '';
 
@@ -19,7 +19,7 @@ export class RoleDashboard {
 
   ngOnInit(): void {
     if (this.authService.role() === 'admin') {
-      this.loadPendingShops();
+      this.loadShops();
     }
   }
 
@@ -69,31 +69,44 @@ export class RoleDashboard {
     return 'Browse Products';
   });
 
-  loadPendingShops(): void {
+  loadShops(): void {
     this.approvalLoading = true;
     this.approvalError = '';
 
-    this.authService.getPendingShops().subscribe({
+    this.authService.getAllShops().subscribe({
       next: (shops) => {
-        this.pendingShops = shops;
+        this.shops = shops;
         this.approvalLoading = false;
       },
       error: (err: { error?: { message?: string } }) => {
-        this.approvalError = err.error?.message || 'Unable to load pending shops.';
+        this.approvalError = err.error?.message || 'Unable to load shops.';
         this.approvalLoading = false;
       }
     });
   }
 
-  updateApproval(shopId: string, status: 'approved' | 'rejected'): void {
+  updateShopStatus(shopId: string, status: 'pending' | 'approved' | 'rejected' | 'suspended'): void {
     this.approvalError = '';
 
-    this.authService.updateShopApprovalStatus(shopId, status).subscribe({
+    this.authService.updateShopStatus(shopId, status).subscribe({
       next: () => {
-        this.pendingShops = this.pendingShops.filter((shop) => shop._id !== shopId);
+        this.loadShops();
       },
       error: (err: { error?: { message?: string } }) => {
-        this.approvalError = err.error?.message || 'Unable to update shop approval.';
+        this.approvalError = err.error?.message || 'Unable to update shop status.';
+      }
+    });
+  }
+
+  deleteShop(shopId: string): void {
+    this.approvalError = '';
+
+    this.authService.deleteShop(shopId).subscribe({
+      next: () => {
+        this.shops = this.shops.filter((shop) => shop._id !== shopId);
+      },
+      error: (err: { error?: { message?: string } }) => {
+        this.approvalError = err.error?.message || 'Unable to delete shop.';
       }
     });
   }

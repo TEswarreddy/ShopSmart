@@ -25,10 +25,12 @@
 
 			<nav class="utility-nav d-none d-lg-flex">
 				@if (authService.user(); as user) {
-					<a class="utility-link" [routerLink]="dashboardRoute()" (click)="closeMenu()">
-						<span class="small-label">Hello, {{ user.name }}</span>
-						<strong>{{ roleLabel(user.role) }} Account</strong>
-					</a>
+					@if (user.role !== 'user') {
+						<a class="utility-link" [routerLink]="dashboardRoute()" (click)="closeMenu()">
+							<span class="small-label">Hello, {{ user.name }}</span>
+							<strong>{{ roleLabel(user.role) }} Account</strong>
+						</a>
+					}
 				} @else {
 					<a class="utility-link" routerLink="/login/user" (click)="closeMenu()">
 						<span class="small-label">Hello, sign in</span>

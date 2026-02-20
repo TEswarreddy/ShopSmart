@@ -24,17 +24,17 @@
 
     @if (authService.role() === 'admin') {
       <section class="mt-4">
-        <h2 class="h5">Shop Approval Requests</h2>
+        <h2 class="h5">Shop Management</h2>
 
         @if (approvalError) {
           <div class="alert alert-danger" role="alert">{{ approvalError }}</div>
         }
 
         @if (approvalLoading) {
-          <p class="mb-0">Loading pending shops...</p>
+          <p class="mb-0">Loading shops...</p>
         } @else {
-          @if (pendingShops.length === 0) {
-            <p class="text-muted mb-0">No pending shop approvals.</p>
+          @if (shops.length === 0) {
+            <p class="text-muted mb-0">No shops found.</p>
           } @else {
             <div class="table-responsive">
               <table class="table table-sm align-middle">
@@ -42,19 +42,29 @@
                   <tr>
                     <th>Shop</th>
                     <th>Email</th>
+                    <th>Status</th>
+                    <th>Products</th>
+                    <th>Orders</th>
+                    <th>Sales</th>
                     <th>Owner</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  @for (shop of pendingShops; track shop._id) {
+                  @for (shop of shops; track shop._id) {
                     <tr>
                       <td>{{ shop.shopDetails?.shopName || shop.name }}</td>
                       <td>{{ shop.email }}</td>
+                      <td>{{ shop.shopApprovalStatus | titlecase }}</td>
+                      <td>{{ shop.totalProducts }}</td>
+                      <td>{{ shop.totalOrders }}</td>
+                      <td>₹{{ shop.totalSales }}</td>
                       <td>{{ shop.shopDetails?.ownerName || '-' }}</td>
-                      <td class="d-flex gap-2">
-                        <button class="btn btn-sm btn-success" type="button" (click)="updateApproval(shop._id, 'approved')">Approve</button>
-                        <button class="btn btn-sm btn-outline-danger" type="button" (click)="updateApproval(shop._id, 'rejected')">Reject</button>
+                      <td class="d-flex gap-2 flex-wrap">
+                        <button class="btn btn-sm btn-success" type="button" [disabled]="shop.shopApprovalStatus === 'approved'" (click)="updateShopStatus(shop._id, 'approved')">Approve</button>
+                        <button class="btn btn-sm btn-warning" type="button" [disabled]="shop.shopApprovalStatus === 'suspended'" (click)="updateShopStatus(shop._id, 'suspended')">Suspend</button>
+                        <button class="btn btn-sm btn-outline-secondary" type="button" [disabled]="shop.shopApprovalStatus === 'rejected'" (click)="updateShopStatus(shop._id, 'rejected')">Reject</button>
+                        <button class="btn btn-sm btn-outline-danger" type="button" (click)="deleteShop(shop._id)">Delete</button>
                       </td>
                     </tr>
                   }
