@@ -1,0 +1,164 @@
+<section class="profile-shell">
+  <div class="profile-card">
+    <h1 class="mb-1">My Profile</h1>
+    <p class="text-muted">View, edit profile details, and update password.</p>
+
+    @if (loading) {
+      <p class="mb-0">Loading profile...</p>
+    } @else {
+      @if (errorMessage) {
+        <div class="alert alert-danger" role="alert">{{ errorMessage }}</div>
+      }
+
+      @if (successMessage) {
+        <div class="alert alert-success" role="alert">{{ successMessage }}</div>
+      }
+
+      <div class="section-title">Profile Details</div>
+      <form [formGroup]="editForm" class="profile-form" novalidate>
+        <div class="grid two-col">
+          <div>
+            <label class="form-label" for="name">Name</label>
+            <input id="name" class="form-control" type="text" formControlName="name" />
+            @if (fieldError('name')) {
+              <small class="text-danger">{{ fieldError('name') }}</small>
+            }
+          </div>
+
+          <div>
+            <label class="form-label" for="email">Email</label>
+            <input id="email" class="form-control" type="email" [value]="profileData?.email || ''" disabled />
+          </div>
+
+          <div>
+            <label class="form-label" for="phone">Phone</label>
+            <input id="phone" class="form-control" type="tel" formControlName="phone" />
+            @if (fieldError('phone')) {
+              <small class="text-danger">{{ fieldError('phone') }}</small>
+            }
+          </div>
+
+          <div>
+            <label class="form-label" for="role">Role</label>
+            <input id="role" class="form-control" type="text" [value]="(profileData?.role || '') | titlecase" disabled />
+          </div>
+        </div>
+
+        @if (isUserRole()) {
+          <div class="section-title">Personal Details</div>
+          <div class="grid two-col">
+            <div>
+              <label class="form-label" for="gender">Gender</label>
+              <select id="gender" class="form-select" formControlName="gender">
+                <option value="">Prefer not to say</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="form-label" for="dateOfBirth">Date of Birth</label>
+              <input id="dateOfBirth" class="form-control" type="date" formControlName="dateOfBirth" />
+            </div>
+          </div>
+        }
+
+        @if (isShopRole()) {
+          <div class="section-title">Shop Details</div>
+          <div class="grid two-col">
+            <div>
+              <label class="form-label" for="shopName">Shop Name</label>
+              <input id="shopName" class="form-control" type="text" formControlName="shopName" />
+            </div>
+            <div>
+              <label class="form-label" for="ownerName">Owner Name</label>
+              <input id="ownerName" class="form-control" type="text" formControlName="ownerName" />
+            </div>
+            <div>
+              <label class="form-label" for="businessType">Business Type</label>
+              <input id="businessType" class="form-control" type="text" formControlName="businessType" />
+            </div>
+            <div>
+              <label class="form-label" for="gstNumber">GST Number</label>
+              <input id="gstNumber" class="form-control" type="text" formControlName="gstNumber" />
+            </div>
+            <div class="full-width">
+              <label class="form-label" for="addressLine1">Address Line 1</label>
+              <input id="addressLine1" class="form-control" type="text" formControlName="addressLine1" />
+            </div>
+            <div class="full-width">
+              <label class="form-label" for="addressLine2">Address Line 2</label>
+              <input id="addressLine2" class="form-control" type="text" formControlName="addressLine2" />
+            </div>
+            <div>
+              <label class="form-label" for="city">City</label>
+              <input id="city" class="form-control" type="text" formControlName="city" />
+            </div>
+            <div>
+              <label class="form-label" for="state">State</label>
+              <input id="state" class="form-control" type="text" formControlName="state" />
+            </div>
+            <div>
+              <label class="form-label" for="postalCode">Postal Code</label>
+              <input id="postalCode" class="form-control" type="text" formControlName="postalCode" />
+            </div>
+            <div>
+              <label class="form-label" for="country">Country</label>
+              <input id="country" class="form-control" type="text" formControlName="country" />
+            </div>
+            <div class="full-width">
+              <label class="form-label" for="website">Website</label>
+              <input id="website" class="form-control" type="url" formControlName="website" />
+            </div>
+          </div>
+        }
+      </form>
+
+      <div class="actions mt-3">
+        @if (!isEditing) {
+          <button class="btn btn-warning" type="button" (click)="startEdit()">Edit Profile</button>
+        } @else {
+          <button class="btn btn-warning" type="button" [disabled]="savingProfile" (click)="saveProfile()">
+            {{ savingProfile ? 'Saving...' : 'Save Changes' }}
+          </button>
+          <button class="btn btn-outline-dark" type="button" [disabled]="savingProfile" (click)="cancelEdit()">Cancel</button>
+        }
+      </div>
+
+      <div class="section-title mt-4">Update Password</div>
+      <form [formGroup]="passwordForm" class="password-form" novalidate>
+        <div>
+          <label class="form-label" for="currentPassword">Current Password</label>
+          <input id="currentPassword" class="form-control" type="password" formControlName="currentPassword" />
+          @if (passwordFieldError('currentPassword')) {
+            <small class="text-danger">{{ passwordFieldError('currentPassword') }}</small>
+          }
+        </div>
+
+        <div>
+          <label class="form-label" for="newPassword">New Password</label>
+          <input id="newPassword" class="form-control" type="password" formControlName="newPassword" />
+          @if (passwordFieldError('newPassword')) {
+            <small class="text-danger">{{ passwordFieldError('newPassword') }}</small>
+          }
+        </div>
+
+        <div>
+          <label class="form-label" for="confirmPassword">Confirm New Password</label>
+          <input id="confirmPassword" class="form-control" type="password" formControlName="confirmPassword" />
+          @if (passwordFieldError('confirmPassword')) {
+            <small class="text-danger">{{ passwordFieldError('confirmPassword') }}</small>
+          }
+          @if (passwordMismatch()) {
+            <small class="text-danger">New password and confirm password must match.</small>
+          }
+        </div>
+
+        <button class="btn btn-warning" type="button" [disabled]="changingPassword" (click)="changePassword()">
+          {{ changingPassword ? 'Updating...' : 'Update Password' }}
+        </button>
+      </form>
+    }
+  </div>
+</section>

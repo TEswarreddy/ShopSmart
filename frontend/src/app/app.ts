@@ -36,6 +36,11 @@ export class App {
     return this.authService.getDefaultRouteByRole();
   }
 
+  canAccessDashboard(): boolean {
+    const role = this.authService.role();
+    return role === 'admin' || role === 'shop';
+  }
+
   orderHistoryRoute(): string {
     return this.authService.role() === 'admin' ? '/admin/orders' : '/orders';
   }

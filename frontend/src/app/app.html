@@ -39,6 +39,12 @@
 					<span class="small-label">Returns</span>
 					<strong>& Orders</strong>
 				</a>
+				@if (authService.isLoggedIn()) {
+					<a class="utility-link" routerLink="/profile" (click)="closeMenu()">
+						<span class="small-label">Manage</span>
+						<strong>Profile</strong>
+					</a>
+				}
 				@if (canAccessUserCommerce()) {
 					<a class="utility-link cart-link" routerLink="/cart" routerLinkActive="active" (click)="closeMenu()">
 						Cart <span class="cart-badge">{{ cartService.totalItems() }}</span>
@@ -60,8 +66,11 @@
 			<div class="container sub-inner" [class.open]="isMenuOpen">
 				<a class="sub-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMenu()">All Products</a>
 				@if (authService.isLoggedIn()) {
-					<a class="sub-link" [routerLink]="dashboardRoute()" routerLinkActive="active" (click)="closeMenu()">Dashboard</a>
+					@if (canAccessDashboard()) {
+						<a class="sub-link" [routerLink]="dashboardRoute()" routerLinkActive="active" (click)="closeMenu()">Dashboard</a>
+					}
 					<a class="sub-link" [routerLink]="orderHistoryRoute()" routerLinkActive="active" (click)="closeMenu()">Orders</a>
+					<a class="sub-link" routerLink="/profile" routerLinkActive="active" (click)="closeMenu()">Profile</a>
 				}
 				@if (canAccessUserCommerce()) {
 					<a class="sub-link" routerLink="/cart" routerLinkActive="active" (click)="closeMenu()">Your Cart</a>

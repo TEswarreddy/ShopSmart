@@ -157,3 +157,117 @@ exports.loginUser = async (req, res) => {
     res.status(401).json({ message: "Invalid email or password" });
   }
 };
+
+exports.getUserProfile = async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "Not authorized" });
+  }
+
+  res.json({
+    _id: req.user._id,
+    name: req.user.name,
+    email: req.user.email,
+    phone: req.user.phone,
+    role: req.user.role,
+    profile: req.user.profile,
+    shopDetails: req.user.shopDetails,
+  });
+};
+
+exports.updateUserProfile = async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "Not authorized" });
+  }
+
+  const { name, phone, gender, dateOfBirth, shopDetails } = req.body;
+  const user = await User.findById(req.user._id);
+
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  if (name !== undefined) {
+    if (!String(name).trim() || String(name).trim().length < 2) {
+      return res.status(400).json({ message: "Please enter a valid name" });
+    }
+    user.name = String(name).trim();
+  }
+
+  if (phone !== undefined) {
+    const normalizedPhone = String(phone || "").trim();
+    if (normalizedPhone && !isPhoneValid(normalizedPhone)) {
+      return res.status(400).json({ message: "Please enter a valid phone number" });
+    }
+    user.phone = normalizedPhone;
+  }
+
+  if (user.role === "user") {
+    user.profile = {
+      ...(user.profile || {}),
+      ...(gender !== undefined ? { gender } : {}),
+      ...(dateOfBirth !== undefined
+        ? {
+            dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : undefined,
+          }
+        : {}),
+    };
+
+    if (dateOfBirth !== undefined && dateOfBirth) {
+      const parsedDob = new Date(dateOfBirth);
+      if (Number.isNaN(parsedDob.getTime())) {
+        return res.status(400).json({ message: "Invalid date of birth" });
+      }
+      user.profile.dateOfBirth = parsedDob;
+    }
+  }
+
+  if (user.role === "shop" && shopDetails) {
+    user.shopDetails = {
+      ...(user.shopDetails || {}),
+      ...shopDetails,
+    };
+  }
+
+  const updatedUser = await user.save();
+
+  res.json({
+    _id: updatedUser._id,
+    name: updatedUser.name,
+    email: updatedUser.email,
+    phone: updatedUser.phone,
+    role: updatedUser.role,
+    profile: updatedUser.profile,
+    shopDetails: updatedUser.shopDetails,
+  });
+};
+
+exports.updateUserPassword = async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "Not authorized" });
+  }
+
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ message: "Current password and new password are required" });
+  }
+
+  if (!isPasswordValid(newPassword)) {
+    return res.status(400).json({ message: "Password must be at least 6 characters" });
+  }
+
+  const user = await User.findById(req.user._id);
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  const isMatch = await bcrypt.compare(currentPassword, user.password);
+  if (!isMatch) {
+    return res.status(400).json({ message: "Current password is incorrect" });
+  }
+
+  user.password = await bcrypt.hash(newPassword, 10);
+  await user.save();
+
+  res.json({ message: "Password updated successfully" });
+};

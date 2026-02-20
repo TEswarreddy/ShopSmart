@@ -15,6 +15,10 @@ export interface AuthUser {
   email: string;
   phone?: string;
   role: UserRole;
+  profile?: {
+    gender?: string;
+    dateOfBirth?: string;
+  };
   shopDetails?: {
     shopName?: string;
     ownerName?: string;
@@ -70,6 +74,24 @@ export interface ShopRegisterPayload {
 
 export type RegisterPayload = UserRegisterPayload | ShopRegisterPayload;
 
+export interface UserProfile {
+  _id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  role: UserRole;
+  profile?: {
+    gender?: string;
+    dateOfBirth?: string;
+  };
+  shopDetails?: AuthUser['shopDetails'];
+}
+
+export interface UpdatePasswordPayload {
+  currentPassword: string;
+  newPassword: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -94,6 +116,20 @@ export class AuthService {
       .pipe(tap((user) => this.setSession(user)));
   }
 
+  getProfile(): Observable<UserProfile> {
+    return this.http.get<UserProfile>(`${environment.apiUrl}/users/profile`);
+  }
+
+  updateProfile(payload: Partial<UserProfile> & { shopDetails?: AuthUser['shopDetails'] }): Observable<UserProfile> {
+    return this.http
+      .put<UserProfile>(`${environment.apiUrl}/users/profile`, payload)
+      .pipe(tap((profile) => this.syncUserFromProfile(profile)));
+  }
+
+  updatePassword(payload: UpdatePasswordPayload): Observable<{ message: string }> {
+    return this.http.put<{ message: string }>(`${environment.apiUrl}/users/profile/password`, payload);
+  }
+
   logout(): void {
     this.userSignal.set(null);
     localStorage.removeItem(AUTH_KEY);
@@ -116,12 +152,28 @@ export class AuthService {
     if (resolvedRole === 'shop') {
       return '/shop/dashboard';
     }
-    return '/user/dashboard';
+    return '/';
   }
 
   private setSession(user: AuthUser): void {
     this.userSignal.set(user);
     localStorage.setItem(AUTH_KEY, JSON.stringify(user));
+  }
+
+  private syncUserFromProfile(profile: UserProfile): void {
+    const current = this.userSignal();
+    if (!current) {
+      return;
+    }
+
+    this.setSession({
+      ...current,
+      name: profile.name,
+      phone: profile.phone,
+      role: profile.role,
+      profile: profile.profile,
+      shopDetails: profile.shopDetails
+    });
   }
 
   private readUserFromStorage(): AuthUser | null {
