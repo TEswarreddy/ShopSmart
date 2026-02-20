@@ -30,6 +30,7 @@ const userSchema = mongoose.Schema({
   email: { type: String, required: true, unique: true },
   phone: { type: String },
   password: { type: String, required: true },
+  isBlocked: { type: Boolean, default: false },
   profile: profileSchema,
   shopDetails: shopDetailsSchema,
   role: {

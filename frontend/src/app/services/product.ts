@@ -21,6 +21,12 @@ export interface ShopProduct {
     comment: string;
     createdAt?: string;
   }>;
+  createdAt?: string;
+  shop?: {
+    _id?: string;
+    name?: string;
+    email?: string;
+  };
 }
 
 @Injectable({
@@ -61,6 +67,10 @@ export class Product {
     return this.http.get<ShopProduct[]>(`${environment.apiUrl}/products/shop/my`);
   }
 
+  getAllProductsForAdmin(): Observable<ShopProduct[]> {
+    return this.http.get<ShopProduct[]>(`${environment.apiUrl}/products/admin/all`);
+  }
+
   addShopProduct(payload: Partial<ShopProduct>): Observable<ShopProduct> {
     return this.http.post<ShopProduct>(`${environment.apiUrl}/products/shop`, payload);
   }
@@ -71,6 +81,10 @@ export class Product {
 
   deleteShopProduct(productId: string): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(`${environment.apiUrl}/products/shop/${productId}`);
+  }
+
+  deleteProductAsAdmin(productId: string): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${environment.apiUrl}/products/${productId}`);
   }
 
   uploadShopProductImage(file: File): Observable<{ imageUrl: string }> {

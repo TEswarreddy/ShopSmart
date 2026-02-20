@@ -7,6 +7,7 @@ const {
   updateProduct,
   deleteProduct,
   addProductReview,
+  getAllProductsForAdmin,
   getMyShopProducts,
   addShopProduct,
   updateShopProduct,
@@ -17,6 +18,7 @@ const { protect, admin, shopApproved } = require("../middleware/authMiddleware")
 const { uploadProductImage } = require("../middleware/uploadMiddleware");
 
 router.get("/", getProducts);
+router.get("/admin/all", protect, admin, getAllProductsForAdmin);
 router.get("/shop/my", protect, shopApproved, getMyShopProducts);
 router.post("/shop/upload-image", protect, shopApproved, uploadProductImage.single("image"), uploadShopProductImage);
 router.post("/shop", protect, shopApproved, addShopProduct);

@@ -151,6 +151,10 @@ exports.loginUser = async (req, res) => {
   const user = await User.findOne({ email });
 
   if (user && (await bcrypt.compare(password, user.password))) {
+    if (user.role === "user" && user.isBlocked) {
+      return res.status(403).json({ message: "Your account is blocked by admin" });
+    }
+
     if (role && role !== user.role) {
       return res.status(403).json({ message: "Role does not match this account" });
     }
@@ -392,4 +396,49 @@ exports.deleteShop = async (req, res) => {
 
   await shop.deleteOne();
   res.json({ message: "Shop deleted" });
+};
+
+exports.getAllUsers = async (req, res) => {
+  const users = await User.find({ role: "user" })
+    .select("name email phone isBlocked createdAt")
+    .sort({ createdAt: -1 });
+
+  res.json(users);
+};
+
+exports.updateUserBlockStatus = async (req, res) => {
+  const { isBlocked } = req.body;
+
+  if (typeof isBlocked !== "boolean") {
+    return res.status(400).json({ message: "isBlocked must be boolean" });
+  }
+
+  const user = await User.findById(req.params.id);
+
+  if (!user || user.role !== "user") {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  user.isBlocked = isBlocked;
+  await user.save();
+
+  res.json({
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    phone: user.phone,
+    isBlocked: user.isBlocked,
+    createdAt: user.createdAt,
+  });
+};
+
+exports.deleteUser = async (req, res) => {
+  const user = await User.findById(req.params.id);
+
+  if (!user || user.role !== "user") {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  await user.deleteOne();
+  res.json({ message: "User deleted" });
 };

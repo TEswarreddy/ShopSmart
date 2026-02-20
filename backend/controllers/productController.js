@@ -29,6 +29,14 @@ exports.getProducts = async (req, res) => {
   res.json(products);
 };
 
+exports.getAllProductsForAdmin = async (req, res) => {
+  const products = await Product.find({})
+    .populate("shop", "name email")
+    .sort({ createdAt: -1 });
+
+  res.json(products);
+};
+
 // 🔍 Get Single Product
 exports.getProductById = async (req, res) => {
   if (!mongoose.Types.ObjectId.isValid(req.params.id)) {

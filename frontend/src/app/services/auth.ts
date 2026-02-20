@@ -109,6 +109,15 @@ export interface AdminShop extends PendingShop {
   totalOrders: number;
 }
 
+export interface AdminUser {
+  _id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  isBlocked: boolean;
+  createdAt: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -165,6 +174,18 @@ export class AuthService {
 
   deleteShop(shopId: string): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(`${environment.apiUrl}/users/shops/${shopId}`);
+  }
+
+  getAllUsers(): Observable<AdminUser[]> {
+    return this.http.get<AdminUser[]>(`${environment.apiUrl}/users/admin/users`);
+  }
+
+  updateUserBlockStatus(userId: string, isBlocked: boolean): Observable<AdminUser> {
+    return this.http.put<AdminUser>(`${environment.apiUrl}/users/admin/users/${userId}/block`, { isBlocked });
+  }
+
+  deleteUser(userId: string): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${environment.apiUrl}/users/admin/users/${userId}`);
   }
 
   logout(): void {
