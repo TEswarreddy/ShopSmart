@@ -44,8 +44,7 @@ export class ShopDashboard {
   deletingProductId = '';
 
   shopOrders: OrderResponse[] = [];
-  orderStatusOptions = ['Processing', 'Paid', 'Shipped', 'Delivered', 'Cancelled'];
-  paymentStatusOptions = ['Pending', 'Completed', 'Failed', 'Refunded'];
+  orderStatusOptions = ['Shipped', 'Delivered'];
 
   salesReport: ShopSalesReportResponse | null = null;
 
@@ -228,9 +227,13 @@ export class ShopDashboard {
     });
   }
 
-  updateOrderStatus(order: OrderResponse, status: string, paymentStatus: string): void {
+  updateOrderStatus(order: OrderResponse, status: string): void {
+    if (!status) {
+      return;
+    }
+
     this.orderService
-      .updateShopOrderStatus(order._id, { status, paymentStatus })
+      .updateShopOrderStatus(order._id, { status })
       .subscribe({
         next: (updatedOrder) => {
           this.shopOrders = this.shopOrders.map((item) =>
@@ -242,6 +245,20 @@ export class ShopDashboard {
           this.error = err.error?.message || 'Unable to update order status.';
         }
       });
+  }
+
+  getNextStatus(order: OrderResponse): string {
+    if (order.orderStatus === 'Processing') {
+      return 'Shipped';
+    }
+    if (order.orderStatus === 'Shipped') {
+      return 'Delivered';
+    }
+    return '';
+  }
+
+  canUpdateOrderStatus(order: OrderResponse): boolean {
+    return this.getNextStatus(order) !== '';
   }
 
   selectSection(sectionId: (typeof this.sidebarItems)[number]['id']): void {

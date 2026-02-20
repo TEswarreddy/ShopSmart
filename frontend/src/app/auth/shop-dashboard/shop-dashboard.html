@@ -171,6 +171,7 @@
                         <small class="text-muted">{{ order.createdAt | date: 'mediumDate' }}</small>
                       </div>
                       <div class="small mb-2">Your Total: {{ (order.shopTotalPrice ?? order.totalPrice) | currency: 'INR' : 'symbol' : '1.0-0' }}</div>
+                      <div class="small text-muted mb-2">Current Status: {{ order.orderStatus }}</div>
 
                       <ul class="item-list mb-2">
                         @for (item of order.items; track item.product._id) {
@@ -179,21 +180,13 @@
                       </ul>
 
                       <div class="d-flex gap-2 flex-wrap">
-                        <select #statusSelect class="form-select form-select-sm status-select">
-                          @for (status of orderStatusOptions; track status) {
-                            <option [selected]="status === order.orderStatus" [value]="status">{{ status }}</option>
-                          }
-                        </select>
-
-                        <select #paymentSelect class="form-select form-select-sm status-select">
-                          @for (paymentStatus of paymentStatusOptions; track paymentStatus) {
-                            <option [selected]="paymentStatus === order.paymentStatus" [value]="paymentStatus">{{ paymentStatus }}</option>
-                          }
-                        </select>
-
-                        <button class="btn btn-sm btn-outline-dark" type="button" (click)="updateOrderStatus(order, statusSelect.value, paymentSelect.value)">
-                          Update
-                        </button>
+                        @if (canUpdateOrderStatus(order)) {
+                          <button class="btn btn-sm btn-outline-dark" type="button" (click)="updateOrderStatus(order, getNextStatus(order))">
+                            Mark as {{ getNextStatus(order) }}
+                          </button>
+                        } @else {
+                          <span class="text-muted small">No further status update allowed.</span>
+                        }
                       </div>
                     </article>
                   }

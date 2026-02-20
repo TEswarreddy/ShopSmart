@@ -172,6 +172,11 @@ exports.getShopOrders = async (req, res) => {
 
 exports.updateShopOrderStatus = async (req, res) => {
   const shopProductIds = await getShopProductIdSet(req.user._id);
+  const { status } = req.body;
+
+  if (!status) {
+    return res.status(400).json({ message: "Status is required" });
+  }
 
   const order = await Order.findById(req.params.id).populate("items.product");
 
@@ -187,8 +192,20 @@ exports.updateShopOrderStatus = async (req, res) => {
     return res.status(403).json({ message: "Not authorized for this order" });
   }
 
-  order.orderStatus = req.body.status || order.orderStatus;
-  order.paymentStatus = req.body.paymentStatus || order.paymentStatus;
+  const nextStatusByCurrent = {
+    Processing: "Shipped",
+    Shipped: "Delivered",
+  };
+
+  const expectedNextStatus = nextStatusByCurrent[order.orderStatus];
+
+  if (!expectedNextStatus || status !== expectedNextStatus) {
+    return res.status(400).json({
+      message: `Invalid status transition. Allowed: ${order.orderStatus} -> ${expectedNextStatus || "N/A"}`,
+    });
+  }
+
+  order.orderStatus = status;
   await order.save();
 
   const updated = await Order.findById(order._id)
